@@ -10,14 +10,6 @@ class ReadMessageFactory extends SlackFeatureFactory {
     return new ReadMessageCommand();
   }
 
-  createInputSchema() {
-    return new SimpleSchema(['channel']);
-  }
-
-  createFormatter() {
-    return new SimpleFormatter();
-  }
-
   getDisplayName() {
     return 'Slack 메시지 읽기';
   }

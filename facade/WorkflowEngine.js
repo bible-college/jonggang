@@ -1,4 +1,4 @@
-// src/facade/WorkflowEngine.js
+const MultiActionNode = require('../node/composite/MultiActionNode');
 
 class WorkflowEngine {
   constructor(triggerFactory, actionFactories = []) {
@@ -10,20 +10,23 @@ class WorkflowEngine {
     const triggerCommand = this.triggerFactory.createCommand();
     const triggerResult = triggerCommand.execute();
 
+    const multiAction = new MultiActionNode();
+
     for (const factory of this.actionFactories) {
       const command = factory.createCommand();
-      const schema = factory.createInputSchema();
-      const formatter = factory.createFormatter();
 
-      // 단순히 트리거 결과를 그대로 넘김 (실제 환경에서는 매핑 필요)
-      const input = triggerResult;
+      const actionNode = {
+        execute(input) {
+          const result = command.execute(input);
+          console.log(`[${factory.getDisplayName()}] 실행 결과:`, result);
+          return result;
+        }
+      };
 
-      // 실행
-      const result = command.execute(input);
-      const output = formatter.format(result);
-
-      console.log(`[${factory.getDisplayName()}] 실행 결과:`, output);
+      multiAction.add(actionNode);
     }
+
+    multiAction.execute(triggerResult);
   }
 }
 

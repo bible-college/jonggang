@@ -10,14 +10,6 @@ class CreatePageFactory extends NotionFeatureFactory {
     return new CreatePageCommand();
   }
 
-  createInputSchema() {
-    return new NotionSchema(['title', 'databaseId', 'content']);
-  }
-
-  createFormatter() {
-    return new JSONFormatter();
-  }
-
   getDisplayName() {
     return 'Notion 페이지 생성';
   }

@@ -10,14 +10,6 @@ class SendMessageFactory extends SlackFeatureFactory {
     return new SendMessageCommand();
   }
 
-  createInputSchema() {
-    return new SimpleSchema(['channel', 'text']);
-  }
-
-  createFormatter() {
-    return new SimpleFormatter();
-  }
-
   getDisplayName() {
     return 'Slack 메시지 보내기';
   }
