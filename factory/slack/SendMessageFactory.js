@@ -2,8 +2,6 @@
 
 const SlackFeatureFactory = require('./SlackFeatureFactory');
 const SendMessageCommand = require('../../command/SendMessageCommand');
-const SimpleSchema = require('../../schema/SimpleSchema');
-const SimpleFormatter = require('../../formatter/SimpleFormatter');
 
 class SendMessageFactory extends SlackFeatureFactory {
   createCommand() {

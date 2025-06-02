@@ -1,25 +1,18 @@
 // src/main.js
 
+const SlackFeatureFactory = require('./factory/slack/SlackFeatureFactory');
+const TimeTriggerFactory = require('./factory/abstract/TimeTriggerFactory');
 const WorkflowEngine = require('./facade/WorkflowEngine');
 
-// 트리거 및 액션 팩토리들
-const TimeTriggerFactory = require('./factory/trigger/TimeTriggerFactory');
+// 1️⃣ 사용자: Slack 플랫폼 선택
+const platformFactory = new SlackFeatureFactory();
 
-const SendMessageFactory = require('./factory/slack/SendMessageFactory');
-const ReadMessageFactory = require('./factory/slack/ReadMessageFactory');
-const CreatePageFactory = require('./factory/notion/CreatePageFactory');
+// 2️⃣ 사용자: Slack에서 사용할 기능 선택
+const selectedFeatures = ['sendMessage']; // 또는 ['sendMessage', 'readMessage']
 
-function main() {
-  const triggerFactory = new TimeTriggerFactory();
+// 3️⃣ 사용자: 트리거 선택 (시간 기반)
+const triggerFactory = new TimeTriggerFactory();
 
-  const actionFactories = [
-    new SendMessageFactory(),
-    new ReadMessageFactory(),
-    new CreatePageFactory(),
-  ];
-
-  const engine = new WorkflowEngine(triggerFactory, actionFactories);
-  engine.run();
-}
-
-main();
+// 4️⃣ 워크플로우 실행
+const engine = new WorkflowEngine(triggerFactory, platformFactory, selectedFeatures);
+engine.run();
