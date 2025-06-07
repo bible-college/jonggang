@@ -1,5 +1,4 @@
 // src/nodes/builders/slack/SlackReadChannelNodeBuilder.js
-
 const SlackReadChannelNode = require('../../actions/slack/SlackReadChannelNode');
 
 class SlackReadChannelNodeBuilder {
@@ -13,8 +12,7 @@ class SlackReadChannelNodeBuilder {
     }
 
     build() {
-        const node = new SlackReadChannelNode(this.channelId);
-        return node;
+        return new SlackReadChannelNode(this.channelId);
     }
 }
 

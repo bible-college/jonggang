@@ -1,6 +1,5 @@
-// src/nodes/builders/slack/SlackMessageNodeBuilder.js (수정)
+
 const SlackMessageNode = require('../../actions/slack/SlackMessageNode');
-// const { v4: uuidv4 } = require('uuid'); // uuid 라이브러리 제거
 
 class SlackMessageNodeBuilder {
     constructor() {
