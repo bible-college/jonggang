@@ -1,9 +1,10 @@
-// src/nodes/builders/notion/NotionPageCreateNodeBuilder.js
-
+// src/nodes/builders/notion/NotionPageCreateNodeBuilder.js (수정)
 const NotionPageCreateNode = require('../../actions/notion/NotionPageCreateNode');
+// const { v4: uuidv4 } = require('uuid'); // uuid 라이브러리 제거
 
 class NotionPageCreateNodeBuilder {
     constructor() {
+        // this.id = uuidv4(); // id 속성 제거
         this.title = '';
         this.content = '';
     }
@@ -19,9 +20,7 @@ class NotionPageCreateNodeBuilder {
     }
 
     build() {
-        // NotionPageCreateNode 생성자에 title, content만 전달합니다.
-        const node = new NotionPageCreateNode(this.title, this.content);
-        return node;
+        return new NotionPageCreateNode(this.title, this.content);
     }
 }
 

@@ -1,24 +1,20 @@
-// src/nodes/triggers/TimeTriggerNode.js
+// src/nodes/triggers/TimeTriggerNode.js (수정)
 const AbstractTriggerNode = require('./AbstractTriggerNode');
 const TimeTriggerStrategy = require('./strategies/TimeTriggerStrategy');
 
-/**
- * @class TimeTriggerNode
- * 특정 시간 간격으로 워크플로우를 트리거하는 노드.
- * (실제 시간 감지 로직은 포함하지 않고, 설계 패턴 예시를 위해 최소화된 동작만 수행)
- * 전략 패턴을 사용하여 실제 시간 감지 로직을 TimeTriggerStrategy에 위임합니다.
- */
 class TimeTriggerNode extends AbstractTriggerNode {
-    constructor(id, name = '시간 트리거', description = '정해진 시간 간격으로 워크플로우를 시작합니다. (설계 모드)', intervalMs = 5000) {
-        super(id, name, description); // 부모 생성자 호출
-        this.intervalMs = intervalMs; // intervalMs를 인스턴스 속성으로 저장
+    // id, name, description 제거
+    constructor(intervalMs = 5000) {
+        super();
+        this.intervalMs = intervalMs;
 
         this.strategy = new TimeTriggerStrategy(intervalMs);
         this.strategy.on('trigger', () => this.eventEmitter.emit('trigger'));
     }
 
     execute() {
-        console.log(`[TimeTriggerNode:${this.id}] 트리거 노드 실행 (감지 시작).`);
+        // id 제거로 인한 콘솔 로그 수정
+        console.log(`[TimeTriggerNode] 트리거 노드 실행 (감지 시작).`);
         this.strategy.startMonitoring();
     }
 }

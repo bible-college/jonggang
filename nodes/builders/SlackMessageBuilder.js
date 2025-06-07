@@ -1,9 +1,10 @@
-// src/nodes/builders/slack/SlackMessageNodeBuilder.js
+// src/nodes/builders/slack/SlackMessageNodeBuilder.js (수정)
 const SlackMessageNode = require('../../actions/slack/SlackMessageNode');
-// const { v4: uuidv4 } = require('uuid'); // UUID 라이브러리 제거 (여기서는 필요 없음)
+// const { v4: uuidv4 } = require('uuid'); // uuid 라이브러리 제거
 
 class SlackMessageNodeBuilder {
     constructor() {
+        // this.id = uuidv4(); // id 속성 제거
         this.channel = '';
         this.message = '';
     }
@@ -19,10 +20,7 @@ class SlackMessageNodeBuilder {
     }
 
     build() {
-        // SlackMessageNode의 constructor가 channel, message만 받도록 변경되었으므로,
-        // 이들을 함께 전달합니다.
-        const node = new SlackMessageNode(this.channel, this.message);
-        return node;
+        return new SlackMessageNode(this.channel, this.message);
     }
 }
 

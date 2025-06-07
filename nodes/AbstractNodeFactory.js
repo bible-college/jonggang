@@ -15,9 +15,6 @@ class AbstractNodeFactory {
     getServiceName() {
         return this.serviceName;
     }
-
-    // 더 이상 createMessageBuilder()와 같은 특정 빌더 생성 메서드를 여기에 정의하지 않습니다.
-    // 이러한 메서드들은 각 Concrete Factory에서만 정의됩니다.
 }
 
 module.exports = AbstractNodeFactory;

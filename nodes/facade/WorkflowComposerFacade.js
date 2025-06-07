@@ -1,16 +1,10 @@
-// src/facade/WorkflowComposerFacade.js
+// src/facade/WorkflowComposerFacade.js (수정)
 
-// 필요한 각 클래스를 개별적으로 명시적 경로로 require 합니다.
 const SequentialWorkflow = require('../nodes/composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../nodes/factories/DefaultSlackNodeFactory');
 const DefaultNotionNodeFactory = require('../nodes/factories/DefaultNotionNodeFactory');
-
-// 트리거 노드들을 직접 require 합니다.
 const TimeTriggerNode = require('../nodes/triggers/TimeTriggerNode');
 const FileTriggerNode = require('../nodes/triggers/FileTriggerNode');
-
-const { v4: uuidv4 } = require('uuid'); // ID 생성을 위해 uuid 라이브러리 임포트
-
 
 /**
  * @class WorkflowComposerFacade
@@ -23,13 +17,11 @@ class WorkflowComposerFacade {
         this.notionFactory = new DefaultNotionNodeFactory();
         this.currentWorkflow = null;
     }
-
-    startNewWorkflow(name = '새로운 워크플로우', description = '자동화 워크플로우.') {
-        this.currentWorkflow = new SequentialWorkflow(uuidv4(), name, description);
+    startNewWorkflow() {
+        this.currentWorkflow = new SequentialWorkflow(); // 인자 없이 생성
         return this;
     }
 
-    // --- 액션 노드 추가 메서드 ---
     addSlackMessageNode(channel, message) {
         const slackMessageNode = this.slackFactory.createMessageBuilder()
             .setChannel(channel)
@@ -55,22 +47,22 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(notionPageNode);
         return this;
     }
-    addTimeTriggerNode(id, intervalMs = 5000) {
-        const timeTrigger = new TimeTriggerNode(id, undefined, undefined, intervalMs);
+
+    addTimeTriggerNode(intervalMs = 5000) { // id 제거
+        const timeTrigger = new TimeTriggerNode(intervalMs); // id 없이 생성
         this.currentWorkflow.add(timeTrigger);
         return this;
     }
 
-    addFileTriggerNode(id, filePath, eventType = 'change') {
-        const fileTrigger = new FileTriggerNode(id, undefined, undefined, filePath, eventType);
+    addFileTriggerNode(filePath, eventType = 'change') { // id 제거
+        const fileTrigger = new FileTriggerNode(filePath, eventType); // id 없이 생성
         this.currentWorkflow.add(fileTrigger);
         return this;
     }
-    // --- 트리거 노드 추가 메서드 끝 ---
 
     build() {
         const builtWorkflow = this.currentWorkflow;
-        this.currentWorkflow = null; // 빌드 후 워크플로우 초기화 (새로운 워크플로우 생성을 위함)
+        this.currentWorkflow = null;
         return builtWorkflow;
     }
 }
