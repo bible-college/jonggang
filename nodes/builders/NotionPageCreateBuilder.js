@@ -1,19 +1,15 @@
-// src/nodes/builders/NotionPageCreateBuilder.js
-const NotionPageCreateNode = require('../actions/notion/NotionPageCreateNode');
+// src/nodes/builders/notion/NotionPageCreateNodeBuilder.js
 
-/**
- * @class NotionPageCreateBuilder
- * Notion 페이지 생성 노드(NotionPageCreateNode)를 단계적으로 구성하는 빌더 클래스.
- */
-class NotionPageCreateBuilder {
+const NotionPageCreateNode = require('../../actions/notion/NotionPageCreateNode');
+
+class NotionPageCreateNodeBuilder {
     constructor() {
-        this.pageTitle = null;
-        this.content = null;
-        // 필요에 따라 Notion 페이지의 다른 속성 (parent, properties 등) 추가 가능
+        this.title = '';
+        this.content = '';
     }
 
     setTitle(title) {
-        this.pageTitle = title;
+        this.title = title;
         return this;
     }
 
@@ -23,11 +19,10 @@ class NotionPageCreateBuilder {
     }
 
     build() {
-        if (!this.pageTitle) {
-            throw new Error("[NotionPageCreateBuilder] 페이지 제목은 필수입니다.");
-        }
-        return new NotionPageCreateNode(this.pageTitle, this.content);
+        // NotionPageCreateNode 생성자에 title, content만 전달합니다.
+        const node = new NotionPageCreateNode(this.title, this.content);
+        return node;
     }
 }
 
-module.exports = NotionPageCreateBuilder;
+module.exports = NotionPageCreateNodeBuilder;

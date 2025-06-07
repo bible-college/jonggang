@@ -10,21 +10,18 @@ const FileTriggerStrategy = require('./strategies/FileTriggerStrategy');
  */
 class FileTriggerNode extends AbstractTriggerNode {
     constructor(id, name = '파일 트리거', description = '파일 또는 디렉토리 변경 시 워크플로우를 시작합니다. (설계 모드)', filePath, eventType = 'change') {
-        super(id, name, description);
-        if (!filePath) {
-            throw new Error("FileTriggerNode 생성 시 filePath는 필수입니다.");
-        }
+        super(id, name, description); // 부모 생성자 호출
+        this.filePath = filePath; // filePath를 인스턴스 속성으로 저장
+        this.eventType = eventType; // eventType을 인스턴스 속성으로 저장
+
         this.strategy = new FileTriggerStrategy(filePath, eventType);
-        this.strategy.on('trigger', (payload) => this.eventEmitter.emit('trigger', payload));
+        this.strategy.on('trigger', () => this.eventEmitter.emit('trigger'));
     }
 
     execute() {
         console.log(`[FileTriggerNode:${this.id}] 트리거 노드 실행 (감지 시작).`);
         this.strategy.startMonitoring();
-        return { message: "파일 트리거가 감지를 시작했습니다. (설계 모드)" };
     }
-
-    // stop() 메서드 삭제
 }
 
 module.exports = FileTriggerNode;

@@ -1,38 +1,29 @@
-// src/nodes/builders/SlackMessageBuilder.js
-const SlackMessageNode = require('../actions/slack/SlackMessageNode');
+// src/nodes/builders/slack/SlackMessageNodeBuilder.js
+const SlackMessageNode = require('../../actions/slack/SlackMessageNode');
+// const { v4: uuidv4 } = require('uuid'); // UUID 라이브러리 제거 (여기서는 필요 없음)
 
-/**
- * @class SlackMessageBuilder
- * Slack 메시지 노드(SlackMessageNode)를 단계적으로 구성하는 빌더 클래스.
- * 빌더 패턴의 Concrete Builder 역할을 합니다.
- */
-class SlackMessageBuilder {
+class SlackMessageNodeBuilder {
     constructor() {
-        this.channel = null;
-        this.message = null;
-        // 필요에 따라 다른 Slack 메시지 옵션 (blocks, attachments 등) 추가 가능
+        this.channel = '';
+        this.message = '';
     }
 
     setChannel(channel) {
         this.channel = channel;
-        return this; // 메서드 체이닝을 위해 `this` 반환
+        return this;
     }
 
     setMessage(message) {
         this.message = message;
-        return this; // 메서드 체이닝을 위해 `this` 반환
+        return this;
     }
 
-    /**
-     * 설정된 옵션으로 SlackMessageNode 인스턴스를 생성하여 반환합니다.
-     * @returns {SlackMessageNode}
-     */
     build() {
-        if (!this.channel || !this.message) {
-            console.warn("[SlackMessageBuilder] 경고: 채널 또는 메시지가 설정되지 않았습니다. 기본값으로 노드를 생성합니다.");
-        }
-        return new SlackMessageNode(this.channel, this.message);
+        // SlackMessageNode의 constructor가 channel, message만 받도록 변경되었으므로,
+        // 이들을 함께 전달합니다.
+        const node = new SlackMessageNode(this.channel, this.message);
+        return node;
     }
 }
 
-module.exports = SlackMessageBuilder;
+module.exports = SlackMessageNodeBuilder;

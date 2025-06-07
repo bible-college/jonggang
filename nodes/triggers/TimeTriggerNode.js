@@ -10,18 +10,17 @@ const TimeTriggerStrategy = require('./strategies/TimeTriggerStrategy');
  */
 class TimeTriggerNode extends AbstractTriggerNode {
     constructor(id, name = '시간 트리거', description = '정해진 시간 간격으로 워크플로우를 시작합니다. (설계 모드)', intervalMs = 5000) {
-        super(id, name, description);
+        super(id, name, description); // 부모 생성자 호출
+        this.intervalMs = intervalMs; // intervalMs를 인스턴스 속성으로 저장
+
         this.strategy = new TimeTriggerStrategy(intervalMs);
-        this.strategy.on('trigger', (payload) => this.eventEmitter.emit('trigger', payload));
+        this.strategy.on('trigger', () => this.eventEmitter.emit('trigger'));
     }
 
     execute() {
         console.log(`[TimeTriggerNode:${this.id}] 트리거 노드 실행 (감지 시작).`);
         this.strategy.startMonitoring();
-        return { message: "시간 트리거가 감지를 시작했습니다. (설계 모드)" };
     }
-
-    // stop() 메서드 삭제
 }
 
 module.exports = TimeTriggerNode;

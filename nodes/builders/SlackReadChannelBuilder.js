@@ -1,26 +1,21 @@
-// src/nodes/builders/SlackReadChannelBuilder.js
-const SlackReadChannelNode = require('../actions/slack/SlackReadChannelNode');
+// src/nodes/builders/slack/SlackReadChannelNodeBuilder.js
 
-/**
- * @class SlackReadChannelBuilder
- * Slack 채널 읽기 노드(SlackReadChannelNode)를 단계적으로 구성하는 빌더 클래스.
- */
-class SlackReadChannelBuilder {
+const SlackReadChannelNode = require('../../actions/slack/SlackReadChannelNode');
+
+class SlackReadChannelNodeBuilder {
     constructor() {
-        this.channelId = null;
+        this.channelId = '';
     }
 
-    setChannelId(id) {
-        this.channelId = id;
+    setChannelId(channelId) {
+        this.channelId = channelId;
         return this;
     }
 
     build() {
-        if (!this.channelId) {
-            throw new Error("[SlackReadChannelBuilder] 채널 ID는 필수입니다.");
-        }
-        return new SlackReadChannelNode(this.channelId);
+        const node = new SlackReadChannelNode(this.channelId);
+        return node;
     }
 }
 
-module.exports = SlackReadChannelBuilder;
+module.exports = SlackReadChannelNodeBuilder;

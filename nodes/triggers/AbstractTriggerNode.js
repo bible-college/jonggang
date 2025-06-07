@@ -1,5 +1,5 @@
 // src/nodes/triggers/AbstractTriggerNode.js
-const { WorkflowComponent } = require('../../core');
+const WorkflowComponent = require('../../core/WorkflowComponent'); // 경로 수정 확인
 const EventEmitter = require('events'); // 이벤트 발행을 위해 Node.js의 EventEmitter 사용
 
 /**
@@ -10,40 +10,27 @@ const EventEmitter = require('events'); // 이벤트 발행을 위해 Node.js의
  */
 class AbstractTriggerNode extends WorkflowComponent {
     constructor(id, name, description) {
-        super(id, name, description);
+        super();
         if (new.target === AbstractTriggerNode) {
             throw new TypeError("Abstract class 'AbstractTriggerNode' cannot be instantiated directly.");
         }
+        // id, name, description은 AbstractTriggerNode에서 직접 초기화
+        this.id = id;
+        this.name = name;
+        this.description = description;
+
         this.eventEmitter = new EventEmitter();
         this.workflowToExecute = null; // 이 트리거가 실행할 워크플로우 컴포넌트
     }
-
-    /**
-     * 이 트리거에 연결된 워크플로우를 설정합니다.
-     * @param {WorkflowComponent} workflow - 이 트리거에 의해 실행될 워크플로우 컴포넌트.
-     */
     setWorkflowToExecute(workflow) {
         this.workflowToExecute = workflow;
     }
-
-    /**
-     * 워크플로우 실행 이벤트 리스너를 추가합니다.
-     * @param {function} listener - 이벤트 발생 시 호출될 콜백 함수.
-     */
     onTrigger(listener) {
         this.eventEmitter.on('trigger', listener);
     }
-
-    /**
-     * 트리거 감지를 시작합니다. (추상 메서드)
-     * 각 구체적인 트리거 노드에서 실제 감지 로직을 구현해야 합니다.
-     * @abstract
-     */
     execute() {
         throw new Error("Method 'execute()' must be implemented by concrete trigger nodes.");
     }
-
-    // stop() 메서드 삭제
 }
 
 module.exports = AbstractTriggerNode;
