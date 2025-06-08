@@ -1,5 +1,5 @@
 // src/nodes/factories/DefaultSlackNodeFactory.js
-const AbstractNodeFactory = require('../AbstractNodeFactory'); // AbstractNodeFactory를 require
+const AbstractNodeFactory = require('../../../core/AbstractNodeFactory'); // AbstractNodeFactory를 require
 const SlackMessageBuilder = require('./SlackMessageBuilder');
 const SlackReadChannelBuilder = require('./SlackReadChannelBuilder');
 
