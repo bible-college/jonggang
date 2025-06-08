@@ -1,6 +1,6 @@
 // src/nodes/factories/DefaultNotionNodeFactory.js
-const AbstractNodeFactory = require('./AbstractNodeFactory');
-const NotionPageCreateBuilder = require('../builders/NotionPageCreateBuilder');
+const AbstractNodeFactory = require('../../../core/AbstractNodeFactory');
+const NotionPageCreateBuilder = require('./NotionPageCreateBuilder');
 
 /**
  * @class DefaultNotionNodeFactory

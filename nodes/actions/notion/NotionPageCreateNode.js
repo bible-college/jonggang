@@ -1,6 +1,6 @@
 // src/nodes/actions/notion/NotionPageCreateNode.js (수정)
-const WorkflowComponent = require('../../core/WorkflowComponent');
-const ICommand = require('../../core/ICommand');
+const WorkflowComponent = require('../../../core/WorkflowComponent');
+const ICommand = require('../../../core/ICommand');
 
 // Notion 페이지 생성 로직의 실제 수신자 (Receiver) 역할
 // 비동기 로직 제거, 동기적으로 동작하는 것처럼 수정

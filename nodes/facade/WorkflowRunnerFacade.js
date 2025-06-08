@@ -1,6 +1,6 @@
 // src/facade/WorkflowRunnerFacade.js
-const WorkflowExecutor = require('../core/WorkflowExecutor');
-const AbstractTriggerNode = require('../nodes/triggers/AbstractTriggerNode');
+const WorkflowExecutor = require('../../core/WorkflowExecutor');
+const AbstractTriggerNode = require('../triggers/AbstractTriggerNode');
 
 class WorkflowRunnerFacade {
     constructor() {

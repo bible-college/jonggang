@@ -1,10 +1,10 @@
 // src/facade/WorkflowComposerFacade.js (수정)
 
-const SequentialWorkflow = require('../nodes/composites/SequentialWorkflow');
-const DefaultSlackNodeFactory = require('../nodes/factories/DefaultSlackNodeFactory');
-const DefaultNotionNodeFactory = require('../nodes/factories/DefaultNotionNodeFactory');
-const TimeTriggerNode = require('../nodes/triggers/TimeTriggerNode');
-const FileTriggerNode = require('../nodes/triggers/FileTriggerNode');
+const SequentialWorkflow = require('../composites/SequentialWorkflow');
+const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
+const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
+const TimeTriggerNode = require('../triggers/TimeTriggerNode');
+const FileTriggerNode = require('../triggers/FileTriggerNode');
 
 /**
  * @class WorkflowComposerFacade

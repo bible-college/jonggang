@@ -1,6 +1,6 @@
 // src/nodes/actions/slack/SlackMessageNode.js (수정)
-const WorkflowComponent = require('../../core/WorkflowComponent');
-const ICommand = require('../../core/ICommand');
+const WorkflowComponent = require('../../../core/WorkflowComponent');
+const ICommand = require('../../../core/ICommand');
 
 class SlackMessageReceiver {
     sendMessage(channel, message) {
