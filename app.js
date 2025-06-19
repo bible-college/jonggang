@@ -1,40 +1,27 @@
 const WorkflowComposerFacade = require('./nodes/facade/WorkflowComposerFacade');
 const WorkflowRunnerFacade = require('./nodes/facade/WorkflowRunnerFacade');
 
-
-
 const composer = new WorkflowComposerFacade();
 const runner = new WorkflowRunnerFacade();
 
-// --- 시간 트리거를 사용하는 워크플로우 예시 (설계 모드) ---
-console.log("--- 시간 트리거 워크플로우 구성 및 실행 예시 (설계 모드) ---");
-const timeTriggerWorkflow = composer
+// --- 유튜브 좋아요 트리거 워크플로우 구성 및 실행 예시 (설계 모드) ---
+console.log("--- 유튜브 좋아요 트리거 워크플로우 구성 및 실행 예시 (설계 모드) ---");
+const youtube_save = composer
     .startNewWorkflow()
-    // 'timeTrigger_id_1' ID 인자를 제거하고, intervalMs만 전달합니다.
-    .addTimeTriggerNode(3000) 
-    .addSlackMessageNode('#general', '시간 트리거 워크플로우 실행! (설계 모드)')
-    .addNotionPageCreateNode('시간 트리거 문서 (설계 모드)', '이 문서는 트리거가 활성화될 때 생성됩니다.')
+    .addYouTubeLikeTriggerNode('someVideoId123') // 비디오 ID는 'someVideoId123'으로 설정했습니다.
+    .addSlackMessageNode('#general', '유튜브 좋아요 트리거 워크플로우 실행! (설계 모드)')
+    .addNotionPageCreateNode('유튜브 좋아요 감지 문서 (설계 모드)', '이 문서는 유튜브 좋아요 트리거에 의해 생성됩니다.')
     .build();
 
-runner.runWorkflow(timeTriggerWorkflow);
+runner.runWorkflow(youtube_save);
 
-
-// --- 파일 트리거를 사용하는 워크플로우 예시 (설계 모드) ---
-// console.log("\n--- 파일 트리거 워크플로우 구성 및 실행 예시 (설계 모드) ---");
-// const fileTriggerWorkflow = composer
-//     .startNewWorkflow()
-//     // 'fileTrigger_id_1' ID 인자를 제거하고, filePath와 eventType만 전달합니다.
-//     .addFileTriggerNode('./test-dir', 'change')
-//     .addSlackMessageNode('#dev', '파일 변경 감지! 워크플로우 실행! (설계 모드)')
-//     .addNotionPageCreateNode('파일 변경 감지 문서 (설계 모드)', '이 문서는 파일 트리거에 의해 생성되었습니다.')
-//     .build();
-
-// runner.runWorkflow(fileTriggerWorkflow);
-
-
-// // 애플리케이션 종료 시 로직 (트리거 중지 로직은 삭제됨)
-// process.on('SIGINT', () => {
-//     console.log('\n애플리케이션 종료 요청...');
-//     console.log('애플리케이션 종료 (트리거 중지 로직 없음).');
-//     process.exit();
-// });
+// ***** 중요 수정: 트리거 이벤트 시뮬레이션 부분을 최소화합니다. *****
+console.log("\n--- 외부에서 유튜브 좋아요 트리거 이벤트 강제 발생 시뮬레이션 ---");
+// 워크플로우의 첫 번째 노드(트리거 노드)의 triggerCallback을 직접 호출합니다.
+// youtube_save.nodes[0]은 AbstractTriggerNode 인스턴스이며, triggerCallback을 가지고 있다고 가정합니다.
+youtube_save.nodes[0].triggerCallback({
+    timestamp: new Date(),
+    videoId: youtube_save.nodes[0].videoId,
+    message: `[외부 시뮬레이션] 유튜브 비디오 '${youtube_save.nodes[0].videoId}' 좋아요 변화 감지!`
+});
+console.log("--- 유튜브 좋아요 트리거 이벤트 시뮬레이션 완료 ---");
