@@ -3,8 +3,7 @@
 const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
-const TimeTriggerNode = require('../triggers/TimeTriggerNode');
-const FileTriggerNode = require('../triggers/FileTriggerNode');
+const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
 
 /**
  * @class WorkflowComposerFacade
@@ -50,12 +49,6 @@ class WorkflowComposerFacade {
     addYouTubeLikeTriggerNode(videoId) { // initialLikes 제거
         const youtubeTrigger = new YouTubeLikeTriggerNode(videoId); // initialLikes 제거
         this.currentWorkflow.add(youtubeTrigger);
-        return this;
-    }
-
-    addFileTriggerNode(filePath, eventType = 'change') { // id 제거
-        const fileTrigger = new FileTriggerNode(filePath, eventType); // id 없이 생성
-        this.currentWorkflow.add(fileTrigger);
         return this;
     }
 
