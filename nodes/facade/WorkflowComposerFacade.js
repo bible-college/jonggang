@@ -47,10 +47,9 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(notionPageNode);
         return this;
     }
-
-    addTimeTriggerNode(intervalMs = 5000) { // id 제거
-        const timeTrigger = new TimeTriggerNode(intervalMs); // id 없이 생성
-        this.currentWorkflow.add(timeTrigger);
+    addYouTubeLikeTriggerNode(videoId) { // initialLikes 제거
+        const youtubeTrigger = new YouTubeLikeTriggerNode(videoId); // initialLikes 제거
+        this.currentWorkflow.add(youtubeTrigger);
         return this;
     }
 
