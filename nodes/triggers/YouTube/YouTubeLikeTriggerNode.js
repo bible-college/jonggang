@@ -1,6 +1,6 @@
 // src/nodes/triggers/youtube/YouTubeLikeTriggerNode.js
-const AbstractTriggerNode = require('../AbstractTriggerNode'); // 경로 변경: ../AbstractTriggerNode
-const YouTubeLikeTriggerStrategy = require('./YouTubeLikeTriggerStrategy'); // 경로 변경: ../strategies/YouTubeLikeTriggerStrategy
+const AbstractTriggerNode = require('../AbstractTriggerNode');
+const YouTubeLikeTriggerStrategy = require('./YouTubeLikeTriggerStrategy');
 
 /**
  * @class YouTubeLikeTriggerNode
@@ -10,16 +10,16 @@ const YouTubeLikeTriggerStrategy = require('./YouTubeLikeTriggerStrategy'); // �
  * * 옵저버 패턴에서 Strategy에 대한 Observer 역할을 직접 구현합니다.
  */
 class YouTubeLikeTriggerNode extends AbstractTriggerNode {
-    constructor(videoId) { 
+    constructor(videoId) {
         super();
         this.videoId = videoId;
 
         // **전략 패턴: Context가 구체적인 전략 객체를 생성하고 보관합니다.**
-        this.strategy = new YouTubeLikeTriggerStrategy(videoId); 
+        this.strategy = new YouTubeLikeTriggerStrategy(videoId);
 
         // 전략에 자신을 옵저버로 등록
         // 이 노드가 전략의 옵저버 인터페이스를 구현하고, 전략이 notify를 호출하면 이 노드의 update가 실행됨
-        this.strategy.attach(this); 
+        this.strategy.attach(this);
     }
 
     /**
@@ -29,18 +29,18 @@ class YouTubeLikeTriggerNode extends AbstractTriggerNode {
      */
     update(payload) { // Observer 인터페이스의 update 메서드 구현
         console.log(`[YouTubeLikeTriggerNode] 전략으로부터 'update' 알림 수신, 워크플로우로 전달.`);
-        if (this.workflowToExecute) { 
+        if (this.workflowToExecute) {
             // AbstractTriggerNode의 triggerCallback을 통해 RunnerFacade에 등록된 콜백 호출
-            this.triggerCallback(payload); 
+            this.triggerCallback(payload);
         } else {
             console.log(`[YouTubeLikeTriggerNode] 연결된 워크플로우 없음. 트리거 이벤트: ${JSON.stringify(payload)}`);
         }
     }
 
     execute(context) { // WorkflowComponent의 execute 메서드 구현
-        console.log(`[YouTubeLikeTriggerNode] 노드 실행 지시. 전략에 감지 시작 위임.`);
-        // 오류는 없다고 가정하므로 try-catch 제거
-        this.strategy.startMonitoring(); // **전략 패턴: Context가 Strategy에 동작을 위임합니다.**
+        console.log(`[YouTubeLikeTriggerNode] 노드 실행 지시. (트리거 노드는 감시 준비만 함)`);
+        // **이 줄을 제거합니다.**
+        // this.strategy.startMonitoring();
     }
 
     /**
