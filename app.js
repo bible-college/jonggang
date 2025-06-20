@@ -7,7 +7,7 @@ const Registry = require('./core/Registry'); // Registry 임포트
 // 레지스트리 패턴을 위해, 사용될 구현체 모듈들을 여기서 로드합니다.
 // 이렇게 하면 각 모듈 파일 끝에 있는 Registry.registerImplementation() 호출이 실행됩니다.
 require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation');
-require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
+// require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation'); //클라우드로 사용시 이거 주석 풀기
 
 const composer = new WorkflowComposerFacade();
 const runner = new WorkflowRunnerFacade();
