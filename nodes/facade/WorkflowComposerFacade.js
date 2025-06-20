@@ -1,9 +1,16 @@
-// src/facade/WorkflowComposerFacade.js (수정)
+// src/nodes/facade/WorkflowComposerFacade.js
 
 const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
 const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
+const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
+
+// ITriggerImplementation 구현체들을 이곳으로 임포트합니다.
+const YouTubeLikeTriggerImplementation = require('../triggers/YouTube/YouTubeLikeTriggerImplementation');
+const LocalYouTubePollingImplementation = require('../triggers/YouTube/LocalYouTubePollingImplementation');
+const CloudYouTubeWebhookImplementation = require('../triggers/YouTube/CloudYouTubeWebhookImplementation');
+
 
 /**
  * @class WorkflowComposerFacade
@@ -17,7 +24,7 @@ class WorkflowComposerFacade {
         this.currentWorkflow = null;
     }
     startNewWorkflow() {
-        this.currentWorkflow = new SequentialWorkflow(); // 인자 없이 생성
+        this.currentWorkflow = new SequentialWorkflow();
         return this;
     }
 
@@ -46,8 +53,33 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(notionPageNode);
         return this;
     }
-    addYouTubeLikeTriggerNode(videoId) { // initialLikes 제거
-        const youtubeTrigger = new YouTubeLikeTriggerNode(videoId); // initialLikes 제거
+
+    /**
+     * YouTubeLikeTriggerNode를 워크플로우에 추가합니다.
+     * @param {string} videoId - 이 트리거 노드가 개념적으로 연결될 유튜브 비디오 ID.
+     * @param {string} implementationType - 사용할 구현체의 타입 ('local' 또는 'cloud').
+     * @throws {Error} 지원하지 않는 구현체 타입인 경우.
+     */
+    addYouTubeLikeTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
+        let implementation;
+        let strategy;
+
+        // 1. 구현체 (Implementation) 선택 및 생성 (Bridge 패턴의 구현체 계층)
+        switch (implementationType) {
+            case 'local':
+                implementation = new LocalYouTubePollingImplementation();
+                break;
+            case 'cloud':
+                implementation = new CloudYouTubeWebhookImplementation();
+                break;
+            default:
+                throw new Error(`지원하지 않는 구현체 타입: '${implementationType}'. 'local' 또는 'cloud' 중 하나여야 합니다.`);
+        }
+
+        // 2. 전략 (Strategy) 선택 및 생성 (Strategy 패턴의 구체적 전략)
+        strategy = new YouTubeLikeTriggerStrategy(implementation, notificationType, threshold);
+        // Context(YouTubeLikeTriggerNode)에 전략 객체를 전달
+        const youtubeTrigger = new YouTubeLikeTriggerNode(videoId, strategy);
         this.currentWorkflow.add(youtubeTrigger);
         return this;
     }
