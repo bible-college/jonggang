@@ -1,6 +1,13 @@
 // src/app.js
 const WorkflowComposerFacade = require('./nodes/facade/WorkflowComposerFacade');
 const WorkflowRunnerFacade = require('./nodes/facade/WorkflowRunnerFacade');
+const Registry = require('./core/Registry'); // Registry 임포트
+
+
+// 레지스트리 패턴을 위해, 사용될 구현체 모듈들을 여기서 로드합니다.
+// 이렇게 하면 각 모듈 파일 끝에 있는 Registry.registerImplementation() 호출이 실행됩니다.
+require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation');
+require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
 
 const composer = new WorkflowComposerFacade();
 const runner = new WorkflowRunnerFacade();
@@ -12,6 +19,7 @@ const youtube_save_local_immediate = composer
     .startNewWorkflow()
     .addYouTubeLikeTriggerNode(triggerNodeId_local_immediate, 'local', 'immediate') // 'local' 구현체, 'immediate' 전략
     .addSlackMessageNode('#local-updates', `[${triggerNodeId_local_immediate}] 좋아요 감지 (즉시)!`)
+    .addNotionPageCreateNode(`s노션 좋아요 감지 (배치)!`, '개념적 웹훅을 통해 감지된 배치 이벤트입니다.')
     .build();
 
 runner.runWorkflow(youtube_save_local_immediate);
@@ -72,9 +80,9 @@ simulateEvent(youtube_save_local_immediate.nodes[0], 'videoA_immediate', 100, `[
 // // 3. 임계치 알림 (threshold) 전략 시뮬레이션
 // console.log("\n--- 임계치 알림 (threshold) 전략 시뮬레이션 ---");
 // // 임계치 전략은 초기 상태이거나 변화가 임계치(5) 이상일 때 알림을 보냅니다.
-// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 50, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 50 (초기)`); // 초기 알림
-// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 52, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 52 (변화2)`); // 변화 2, 기준 5 미달
-// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 58, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 58 (변화6)`); // 변화 6, 기준 5 충족 -> 알림
-// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 59, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 59 (변화1)`); // 변화 1, 기준 5 미달
+// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 50, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 50 (초기)`);
+// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 52, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 52 (변화2)`);
+// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 58, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 58 (변화6)`);
+// simulateEvent(youtube_save_local_threshold.nodes[0], 'videoC_threshold', 59, `[시뮬레이션] 비디오 'videoC_threshold' 좋아요 59 (변화1)`);
 
-// console.log("\n--- 모든 시뮬레이션 완료 ---");
+console.log("\n--- 모든 시뮬레이션 완료 ---");

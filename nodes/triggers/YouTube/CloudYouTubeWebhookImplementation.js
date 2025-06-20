@@ -1,5 +1,6 @@
 // src/nodes/triggers/YouTube/CloudYouTubeWebhookImplementation.js
 const ITriggerImplementation = require('../../../core/ITriggerImplementation');
+const Registry = require('../../../core/Registry'); // Registry 임포트
 
 /**
  * @class CloudYouTubeWebhookImplementation
@@ -24,5 +25,8 @@ class CloudYouTubeWebhookImplementation extends ITriggerImplementation {
         this.triggerCallback = null;
     }
 }
+
+// 이 모듈이 로드될 때 자체적으로 레지스트리에 등록
+Registry.registerImplementation('cloud', () => new CloudYouTubeWebhookImplementation());
 
 module.exports = CloudYouTubeWebhookImplementation;
