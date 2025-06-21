@@ -1,38 +1,57 @@
-// src/nodes/triggers/youtube/YouTubeLikeTriggerStrategy.js
-const ITriggerStrategy = require("../strategies/ITriggerStrategy");
 
-/**
- * @class YouTubeLikeTriggerStrategy
- * 특정 유튜브 비디오의 '좋아요' 수 변화를 감지하여 이벤트를 발행하는 트리거 전략.
- * (알고리즘 배제: 워크플로우 실행 시 좋아요 인식되었다고 가정하고 1회성 트리거 발생)
- */
+const ITriggerStrategy = require('../strategies/ITriggerStrategy');
+const ITriggerImplementation = require('../../../core/ITriggerImplementation');
+
 class YouTubeLikeTriggerStrategy extends ITriggerStrategy {
-  constructor(videoId) {
-    super();
-    this.videoId = videoId;
-    this.hasTriggered = false; // 워크플로우 실행 시 1회성 트리거를 위한 플래그
-  }
+    constructor(implementation, notificationType = 'immediate', threshold = 0) {
+        super();
+        if (!(implementation instanceof ITriggerImplementation)) {
+            throw new Error("implementation은 ITriggerImplementation의 인스턴스여야 합니다.");
+        }
+        this.implementation = implementation;
 
-  /**
-   * 감시를 시작합니다. (개념적 구현)
-   */
-  startMonitoring() {
-    console.log(
-      `[YouTubeLikeTriggerStrategy] 전략 실행: 비디오 '${this.videoId}' 감시 시작 (가정).`
-    );
-    // 실제 YouTube API 폴링 또는 웹훅 등록 로직이 여기에 올 수 있습니다.
-    // 예를 들어, 일정 시간마다 좋아요 수를 확인하는 setInterval 등.
-  }
+        this.notificationType = notificationType; 
+        this.threshold = threshold;
 
-  /**
-   * 감시를 중지합니다. (개념적 구현)
-   */
-  stopMonitoring() {
-    console.log(
-      `[YouTubeLikeTriggerStrategy] 전략 실행: 유튜브 좋아요 감지 중지 (가정).`
-    );
-    // 실제 감시 중지 (setInterval 클리어, 웹훅 해제 등) 로직이 여기에 올 수 있습니다.
-  }
+        this.boundHandleImplementationEvent = this.processEvent.bind(this);
+        console.log(`[YouTubeLikeTriggerStrategy] 전략 생성됨 (알림 방식: ${this.notificationType}, 기준: ${this.threshold})`);
+    }
+
+    startMonitoring() {
+        console.log(`[YouTubeLikeTriggerStrategy] 전략 실행: 감시 시작. 구현체에 위임. (개념적)`);
+        this.implementation.startListening(this.boundHandleImplementationEvent);
+    }
+
+    stopMonitoring() {
+        console.log(`[YouTubeLikeTriggerStrategy] 전략 실행: 감지 중지. 구현체에 위임. (개념적)`);
+        this.implementation.stopListening();
+    }
+
+    processEvent(payload) {
+        console.log(`[YouTubeLikeTriggerStrategy] 구현체로부터 이벤트 수신. (수신 비디오 ID: ${payload ? payload.videoId : 'N/A'})`);
+
+        switch (this.notificationType) {
+            case 'immediate':
+                console.log(`[YouTubeLikeTriggerStrategy] 알림 방식: 즉시 알림 전략 실행.`);
+                super.notify(payload);
+                break;
+
+            case 'batch':
+                console.log(`[YouTubeLikeTriggerStrategy] 알림 방식: 배치 알림 전략 실행. (개념적: 여러 이벤트 모아서 알림)`);
+                super.notify(payload);
+                break;
+
+            case 'threshold':
+                console.log(`[YouTubeLikeTriggerStrategy] 알림 방식: 임계치 알림 전략 실행. (개념적: 좋아요 변화 ${this.threshold} 이상일 때 알림)`);
+                super.notify(payload);
+                break;
+                
+            default:
+                console.warn(`[YouTubeLikeTriggerStrategy] 알 수 없는 알림 방식: ${this.notificationType}. 즉시 알림으로 대체. (개념적)`);
+                super.notify(payload);
+                break;
+        }
+    }
 }
 
 module.exports = YouTubeLikeTriggerStrategy;

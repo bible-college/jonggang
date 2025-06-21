@@ -1,58 +1,57 @@
-const WorkflowComponent = require("../../../core/WorkflowComponent");
-const ICommand = require("../../../core/ICommand");
 
-// Slack 채널 메시지 읽기 로직의 실제 수신자 (Receiver) 역할
-// 비동기 로직 제거, 동기적으로 동작하는 것처럼 수정
+const WorkflowComponent = require('../../../core/WorkflowComponent');
+const ICommand = require('../../../core/ICommand');
+
 class SlackReadChannelReceiver {
-  readChannel(channelId) {
-    console.log(
-      `[SlackAPI - Receiver] Slack 채널 메시지 읽기: 채널 ID '${channelId}'`
-    );
-    // 실제 Slack API 호출 로직은 없음. 개념만 전달.
-    // 여기서는 읽어온 메시지 데이터를 반환한다고 가정할 수 있지만,
-    // 현재는 콘솔 로그만 남깁니다.
-    return `[Mock Data] 메시지 목록 from channel ${channelId}`;
-  }
+    readChannel(channelId) {
+        console.log(`[SlackAPI - Receiver] Slack 채널 메시지 읽기: 채널 ID '${channelId}'`);
+        return `[Mock Data] 메시지 목록 from channel ${channelId}`;
+    }
 }
 
-// Slack 채널 메시지를 읽는 구체적인 커맨드 (Concrete Command)
 class SlackReadChannelCommand extends ICommand {
-  constructor(receiver, channelId) {
-    super();
-    this.receiver = receiver;
-    this.channelId = channelId;
-  }
+    constructor(receiver, channelId) {
+        super();
+        this.receiver = receiver;
+        this.channelId = channelId;
+    }
 
-  execute() {
-    console.log(`[SlackReadChannelCommand] 커맨드 실행: Slack 채널 읽기 준비`);
-    const result = this.receiver.readChannel(this.channelId); // 수신자의 실제 작업 호출
-    console.log(`[SlackReadChannelCommand] 커맨드 실행 완료. 결과: ${result}`);
-    return result; // 읽어온 데이터를 반환할 수도 있습니다.
-  }
+    execute() {
+        console.log(`[SlackReadChannelCommand] 커맨드 실행: Slack 채널 읽기 준비`);
+        const result = this.receiver.readChannel(this.channelId); 
+        console.log(`[SlackReadChannelCommand] 커맨드 실행 완료. 결과: ${result}`);
+        return result;
+    }
 }
 
-/**
- * @class SlackReadChannelNode
- * Slack 채널 메시지 읽기 노드.
- * 컴포지트 패턴의 리프 노드 역할과, 내부적으로 커맨드 패턴을 활용합니다.
- */
-class SlackReadChannelNode extends WorkflowComponent {
-  constructor(channelId) {
-    super(); // WorkflowComponent 생성자 호출
-    this.channelId = channelId;
+// 기존: class SlackReadChannelNode extends WorkflowComponent {
+// 수정:
+class SlackReadChannelNode extends WorkflowComponent { // 직접 WorkflowComponent를 상속받습니다.
+    constructor(nodeId, channelId) { // nodeId 인자 추가
+        super(nodeId, `SlackReadChannelNode-${nodeId}`); // 부모 클래스(WorkflowComponent)의 생성자 호출
+        this.channelId = channelId;
 
-    this.receiver = new SlackReadChannelReceiver();
-    this.command = new SlackReadChannelCommand(this.receiver, channelId);
-  }
+        this.receiver = new SlackReadChannelReceiver();
+        this.command = new SlackReadChannelCommand(this.receiver, channelId);
+    }
 
-  // WorkflowComponent의 execute()를 구현합니다.
-  // 이제 이 execute()는 단순히 내부 커맨드의 execute()를 호출합니다.
-  execute() {
-    console.log(`[SlackReadChannelNode] 노드 실행: 내부 커맨드 호출 준비.`);
-    const result = this.command.execute(); // 노드가 가진 커맨드를 실행
-    console.log(`[SlackReadChannelNode] 노드 실행 완료.`);
-    return result; // 커맨드 실행 결과 반환 (읽어온 메시지)
-  }
+    // 기존 execute() 메서드를 doExecute()로 변경하고 노드의 핵심 로직을 여기에 넣습니다.
+    doExecute(context) { // context 인자 추가
+        console.log(`[SlackReadChannelNode] 노드 작업 실행: 내부 커맨드 호출 준비.`);
+        const result = this.command.execute(); // 실제 Slack 채널 읽기 커맨드 실행
+        console.log(`[SlackReadChannelNode] 노드 작업 실행 완료.`);
+        // 이 메서드가 반환하는 값은 NodeExecutionResult의 payload가 됩니다.
+        return { messages: result, channelId: this.channelId }; // 작업 결과 반환
+    }
+
+    // execute() 메서드는 부모인 WorkflowComponent에 의해 제공되므로 여기서 더 이상 구현하지 않습니다.
+    // 기존 execute() 메서드는 다음과 같았음 (이제 필요 없음):
+    // execute() {
+    //     console.log(`[SlackReadChannelNode] 노드 실행: 내부 커맨드 호출 준비.`);
+    //     const result = this.command.execute();
+    //     console.log(`[SlackReadChannelNode] 노드 실행 완료.`);
+    //     return result;
+    // }
 }
 
 module.exports = SlackReadChannelNode;

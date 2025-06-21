@@ -1,28 +1,28 @@
-// src/nodes/triggers/strategies/ITriggerStrategy.js (새로운 AbstractSubject를 상속)
-const AbstractSubject = require("../../../core/AbstractSubject"); // 경로에 따라 조정
 
+const AbstractSubject = require('../../../core/AbstractSubject');
+
+/**
+ * @interface ITriggerStrategy
+ */
 class ITriggerStrategy extends AbstractSubject {
-  // AbstractSubject를 상속
-  constructor() {
-    super(); // AbstractSubject의 생성자 호출
-    if (new.target === ITriggerStrategy) {
-      throw new TypeError(
-        "Interface 'ITriggerStrategy' cannot be instantiated directly."
-      );
+    constructor() {
+        super();
+        if (new.target === ITriggerStrategy) {
+            throw new TypeError("인터페이스 'ITriggerStrategy'는 직접 인스턴스화할 수 없습니다.");
+        }
     }
-  }
 
-  startMonitoring() {
-    throw new Error(
-      "Method 'startMonitoring()' must be implemented by concrete trigger strategies."
-    );
-  }
+    startMonitoring(implementationEventHandler) {
+        throw new Error("메서드 'startMonitoring()'는 구체적인 트리거 전략에 의해 구현되어야 합니다.");
+    }
 
-  stopMonitoring() {
-    throw new Error(
-      "Method 'stopMonitoring()' must be implemented by concrete trigger strategies."
-    );
-  }
+    stopMonitoring() {
+        throw new Error("메서드 'stopMonitoring()'는 구체적인 트리거 전략에 의해 구현되어야 합니다.");
+    }
+
+    processEvent(payload) {
+        throw new Error("메서드 'processEvent()'는 구체적인 트리거 전략에 의해 구현되어야 합니다.");
+    }
 }
 
 module.exports = ITriggerStrategy;
