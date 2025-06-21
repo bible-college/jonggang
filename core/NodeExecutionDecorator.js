@@ -1,3 +1,4 @@
+// core/NodeExecutionDecorator.js
 
 const WorkflowComponent = require('./WorkflowComponent');
 const EventStore = require('./EventStore');
@@ -7,20 +8,10 @@ class NodeExecutionDecorator extends WorkflowComponent {
 
     constructor(workflowComponent) {
         super();
+        // 원본 노드를 누구나 볼 수 있도록 'wrappedComponent' 속성에 저장합니다.
         this.wrappedComponent = workflowComponent;
-        
-        this.nodeId = NodeExecutionDecorator.idCounter++; 
-        
+        this.nodeId = NodeExecutionDecorator.idCounter++;
         this.nodeName = this.wrappedComponent.constructor.name;
-
-        return new Proxy(this, {
-            get(target, prop, receiver) {
-                if (prop in target) {
-                    return Reflect.get(target, prop, receiver);
-                }
-                return Reflect.get(target.wrappedComponent, prop, receiver);
-            }
-        });
     }
 
     execute() {
@@ -34,10 +25,10 @@ class NodeExecutionDecorator extends WorkflowComponent {
 
         let result;
         try {
+            // 포장하고 있던 원본 노드의 execute를 호출합니다.
             result = this.wrappedComponent.execute();
-
             EventStore.logEvent({
-                nodeId: this.nodeId, 
+                nodeId: this.nodeId,
                 nodeName: this.nodeName,
                 timestamp: new Date().toISOString(),
                 status: 'SUCCESS',
@@ -53,16 +44,19 @@ class NodeExecutionDecorator extends WorkflowComponent {
             });
             throw error;
         }
-
         return result;
     }
 
+    // 복합 노드를 위한 위임 코드
     add(component) {
-        this.wrappedComponent.add(component);
+        if (typeof this.wrappedComponent.add === 'function') {
+            this.wrappedComponent.add(component);
+        }
     }
 
-    remove(component) {
-        this.wrappedComponent.remove(component);
+    // 복합 노드가 자신의 노드 목록을 반환할 수 있도록 위임합니다.
+    get nodes() {
+        return this.wrappedComponent.nodes;
     }
 }
 

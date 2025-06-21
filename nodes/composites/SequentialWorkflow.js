@@ -35,9 +35,11 @@ class SequentialWorkflow extends WorkflowComponent {
 
 module.exports = SequentialWorkflow;*/
 
+
 // nodes/composites/SequentialWorkflow.js
 const WorkflowComponent = require('../../core/WorkflowComponent');
 const WorkflowMemento = require('../../core/WorkflowMemento'); // WorkflowMemento 임포트
+const AbstractTriggerNode = require('../triggers/AbstractTriggerNode'); // 트리거 노드 타입을 확인하기 위해 임포트
 
 /**
  * @class SequentialWorkflow
@@ -49,6 +51,9 @@ class SequentialWorkflow extends WorkflowComponent {
     constructor() {
         super(); // WorkflowComponent는 생성자가 없으므로 인자 없이 호출
         this.nodes = [];
+        // *** 핵심 수정 1: 워크플로우의 현재 상태를 기억하는 변수 추가 ***
+        // 'IDLE': 대기 중, 'LISTENING': 트리거 감시 중
+        this.executionState = 'IDLE'; 
     }
 
     add(component) {
@@ -60,12 +65,34 @@ class SequentialWorkflow extends WorkflowComponent {
     }
 
     execute() {
-        console.log(`\n--- [SequentialWorkflow] 순차 워크플로우 실행 시작 ---`);
-        for (const node of this.nodes) {
-            node.execute();
+        // console.log(`\n--- [SequentialWorkflow] 순차 워크플로우 실행 시작 ---`);
+        // for (const node of this.nodes) {
+        //     node.execute();
+        // }
+        // console.log(`--- [SequentialWorkflow] 순차 워크플로우 실행 완료 ---\n`);
+        // return true;
+        if (this.executionState === 'IDLE') {
+            // 상태가 'IDLE'일 때(최초 실행 시)
+            console.log(`[SequentialWorkflow] 상태: IDLE. 트리거 노드 감시를 시작합니다.`);
+            const triggerNode = this.nodes[0];
+            if (triggerNode) {
+                // 첫 번째 노드(트리거)만 실행하여 감시를 시작시킵니다.
+                triggerNode.execute();
+                // 상태를 'LISTENING'으로 변경하여, 다시는 이 코드가 실행되지 않도록 합니다.
+                this.executionState = 'LISTENING';
+            }
+        } else if (this.executionState === 'LISTENING') {
+            // 상태가 'LISTENING'일 때 (트리거가 울려서 두 번째로 실행될 때)
+            console.log(`[SequentialWorkflow] 상태: LISTENING. 액션 노드를 실행합니다.`);
+            
+            // 트리거를 제외한 나머지 '액션' 노드들만 순서대로 실행합니다.
+            for (let i = 0; i < this.nodes.length; i++) {
+                const actionNode = this.nodes[i];
+                actionNode.execute();
+            }
+            // 모든 액션이 끝났으므로, 다음 실행을 위해 상태를 다시 'IDLE'로 되돌립니다.
+            this.executionState = 'IDLE';
         }
-        console.log(`--- [SequentialWorkflow] 순차 워크플로우 실행 완료 ---\n`);
-        return true;
     }
 
     /**
