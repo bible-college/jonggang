@@ -20,11 +20,6 @@ class YouTubeLikeTriggerStrategy extends ITriggerStrategy {
         this.notificationType = notificationType; // 알림 방식: 'immediate', 'batch', 'threshold'
         this.threshold = threshold; // 'threshold' 방식 사용 시 기준값 (개념적)
 
-        // 알고리즘 배제를 위해 실제 상태 관리 변수들을 제거
-        // this.eventBuffer = [];
-        // this.batchTimer = null;
-        // this.lastNotifiedLikes = undefined;
-
         this.boundHandleImplementationEvent = this.processEvent.bind(this);
         console.log(`[YouTubeLikeTriggerStrategy] 전략 생성됨 (알림 방식: ${this.notificationType}, 기준: ${this.threshold})`);
     }
