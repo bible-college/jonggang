@@ -5,10 +5,54 @@ const WorkflowComposerFacade = require('./nodes/facade/WorkflowComposerFacade');
 const WorkflowRunnerFacade = require('./nodes/facade/WorkflowRunnerFacade');
 const Registry = require('./core/Registry');
 
+const EventStore = require('./core/EventStore'); // EventStore 임포트
+const NodeExecutionDecorator = require('./core/NodeExecutionDecorator'); // 데코레이터 임포트
+
 // 레지스트리 패턴을 위해, 사용될 구현체 모듈들을 여기서 로드합니다.
 require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation');
 require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
 
+console.log("\n--- 데코레이터 및 이벤트 소싱 패턴 시연 (uuid 없음) ---");
+
+const composer = new WorkflowComposerFacade();
+const runner = new WorkflowRunnerFacade();
+
+// 1. 원본 워크플로우를 구성합니다.
+const originalWorkflow = composer.startNewWorkflow()
+    .addYouTubeLikeTriggerNode('video-no-uuid-456', 'local', 'immediate')
+    .addSlackMessageNode('#general-logs', '새로운 유튜브 좋아요가 감지되었습니다.')
+    .addNotionPageCreateNode('자동 생성 페이지', '이벤트 소싱 로그 기록')
+    .build();
+
+// 2. 워크플로우의 모든 노드를 데코레이터로 감쌉니다.
+originalWorkflow.nodes = originalWorkflow.nodes.map(node => new NodeExecutionDecorator(node));
+const decoratedWorkflow = new NodeExecutionDecorator(originalWorkflow);
+
+// 3. 데코레이터가 적용된 워크플로우를 실행 준비시킵니다.
+runner.runWorkflow(decoratedWorkflow);
+
+// 4. 외부 이벤트를 시뮬레이션하여 워크플로우를 실행시킵니다.
+const simulateEvent = (triggerNode, videoId) => {
+    console.log(`\n>>> 이벤트 시뮬레이션 시작: 비디오 ID '${videoId}'`);
+    const payload = {
+        timestamp: new Date().toISOString(),
+        videoId: videoId,
+        message: "외부 이벤트 발생!"
+    };
+    triggerNode.strategy.notify(payload);
+};
+
+const triggerNodeInWorkflow = decoratedWorkflow.nodes[0];
+simulateEvent(triggerNodeInWorkflow, 'video-no-uuid-456');
+
+
+// 5. 실행이 끝난 후, EventStore에 기록된 모든 로그를 출력합니다.
+console.log("\n--- 모든 노드 실행 이벤트 로그 ---");
+const allEvents = EventStore.getAllEvents();
+console.table(allEvents); // 테이블 형태로 깔끔하게 출력합니다.
+
+
+/**임시 제거
 // Caretaker 및 SequentialWorkflow 임포트만 유지.
 const WorkflowCaretaker = require('./core/WorkflowCaretaker');
 
@@ -87,3 +131,4 @@ mementoRunner.runWorkflow(dynamicWorkflow);
 simulateEvent(currentTriggerNode, 'video_rollback', 70, '롤백 후 워크플로우 실행');
 
 console.log("\n--- 메멘토 패턴 시연 완료 ---");
+ */
