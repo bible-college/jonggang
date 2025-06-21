@@ -3,6 +3,8 @@
 const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
+const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
+const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
 const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
 const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
 
@@ -94,7 +96,17 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(youtubeTrigger);
         return this;
     }
+    
+    addGmailTriggerNode(accountId, implementationType = 'local', notificationType = 'immediate', threshold = 0) {
+        
+        const ImplementationClass = Registry.createImplementation(implementationType + 'Gmail') 
+        const implementationInstance = new ImplementationClass();
+        const strategy = new GmailTriggerStrategy(implementationInstance, notificationType, threshold);
+        const node = new GmailTriggerNode(accountId, strategy);
 
+        this.currentWorkflow.addNode(node);
+    return this;
+    }
     /**
      * 현재 구성 중인 워크플로우를 완성하고 반환합니다.
      * 이 메서드는 퍼사드의 내부 currentWorkflow를 null로 초기화하지 않습니다.
