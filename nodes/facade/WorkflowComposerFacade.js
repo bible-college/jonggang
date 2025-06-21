@@ -1,9 +1,14 @@
-// src/facade/WorkflowComposerFacade.js (수정)
+// src/nodes/facade/WorkflowComposerFacade.js
 
 const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
 const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
+const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
+
+// Registry 임포트
+const Registry = require('../../core/Registry');
+
 
 /**
  * @class WorkflowComposerFacade
@@ -17,7 +22,7 @@ class WorkflowComposerFacade {
         this.currentWorkflow = null;
     }
     startNewWorkflow() {
-        this.currentWorkflow = new SequentialWorkflow(); // 인자 없이 생성
+        this.currentWorkflow = new SequentialWorkflow();
         return this;
     }
 
@@ -46,8 +51,23 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(notionPageNode);
         return this;
     }
-    addYouTubeLikeTriggerNode(videoId) { // initialLikes 제거
-        const youtubeTrigger = new YouTubeLikeTriggerNode(videoId); // initialLikes 제거
+
+    /**
+     * YouTubeLikeTriggerNode를 워크플로우에 추가합니다.
+     * @param {string} videoId - 이 트리거 노드가 개념적으로 연결될 유튜브 비디오 ID. (노드 식별자)
+     * @param {string} implementationType - 사용할 구현체의 타입 ('local' 또는 'cloud').
+     * @param {string} notificationType - 알림 방식 ('immediate', 'batch', 'threshold').
+     * @param {number} threshold - 'threshold' 방식 사용 시 기준값 (예: 좋아요 변화 수).
+     * @throws {Error} 지원하지 않는 구현체 타입인 경우.
+     */
+    addYouTubeLikeTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
+        // Registry를 사용하여 구현체 인스턴스를 생성합니다.
+        const implementation = Registry.createImplementation(implementationType);
+
+        // 전략 패턴: 구현체를 사용하는 전략을 생성
+        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, notificationType, threshold);
+        // Context(YouTubeLikeTriggerNode)에 전략 객체를 전달
+        const youtubeTrigger = new YouTubeLikeTriggerNode(videoId, youtubeLikeStrategy);
         this.currentWorkflow.add(youtubeTrigger);
         return this;
     }
