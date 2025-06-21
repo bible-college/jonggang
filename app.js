@@ -112,7 +112,7 @@ simulateEvent(currentTriggerNode, 'video_rollback', 70, '롤백 후 워크플로
 // 최종 이벤트 저장소 내용 확인 (디버깅/테스트용)
 console.log("\n--- 기록된 모든 이벤트 ---");
 eventStore.getAllEvents().forEach(event => {
-    console.log(`[Event: ${event.type}] Workflow: ${event.workflowId}, Node: ${event.nodeName}, Time: ${new Date(event.timestamp).toLocaleTimeString()}, Details: ${event.details || (event.error ? event.error.message : 'N/A')}`);
+    console.log(`[Event: ${event.type}] Node: ${event.nodeName}, Time: ${new Date(event.timestamp).toLocaleTimeString()}, `);
 });
 
 console.log("\n--- 메멘토 패턴 시연 완료 ---");
