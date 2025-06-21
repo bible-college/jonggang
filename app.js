@@ -19,7 +19,7 @@ const youtube_save_local_immediate = composer
     .startNewWorkflow()
     .addYouTubeLikeTriggerNode(triggerNodeId_local_immediate, 'local', 'immediate') // 'local' 구현체, 'immediate' 전략
     .addSlackMessageNode('#local-updates', `[${triggerNodeId_local_immediate}] 좋아요 감지 (즉시)!`)
-    .addNotionPageCreateNode(`s노션 좋아요 감지 (배치)!`, '개념적 웹훅을 통해 감지된 배치 이벤트입니다.')
+    .addNotionPageCreateNode(`노션 좋아요 감지 (배치)!`, '개념적 웹훅을 통해 감지된 배치 이벤트입니다.')
     .build();
 
 runner.runWorkflow(youtube_save_local_immediate);
