@@ -1,41 +1,53 @@
 // src/app.js
 
-// 기존 app.js 상단 임포트 유지
-const WorkflowComposerFacade = require('./nodes/facade/WorkflowComposerFacade');
-const WorkflowRunnerFacade = require('./nodes/facade/WorkflowRunnerFacade');
-const Registry = require('./core/Registry');
+// ... (기존 임포트 유지)
+const WorkflowComposerFacade = require('./nodes/facade/WorkflowComposerFacade'); //
+const WorkflowRunnerFacade = require('./nodes/facade/WorkflowRunnerFacade'); //
+const Registry = require('./core/Registry'); //
 
 // 레지스트리 패턴을 위해, 사용될 구현체 모듈들을 여기서 로드합니다.
-//require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation');
-//require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
-require('./nodes/triggers/Gmail/LocalGmailPollingImplementation');
-require('./nodes/triggers/Gmail/CloudGmailWebhookImplementation');
+//require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation'); //
+//require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation'); //
+// Gmail 관련 파일이 있다면 여기에 추가
+ require('./nodes/triggers/Gmail/LocalGmailPollingImplementation');
+ require('./nodes/triggers/Gmail/CloudGmailWebhookImplementation');
+// require('./nodes/triggers/Gmail/GmailTriggerStrategy');
+// require('./nodes/triggers/Gmail/GmailTriggerNode');
+
 
 // Caretaker 및 SequentialWorkflow 임포트만 유지.
-const WorkflowCaretaker = require('./core/WorkflowCaretaker');
+const WorkflowCaretaker = require('./core/WorkflowCaretaker'); //
 
 // 시뮬레이션 헬퍼 함수를 전역 스코프로 이동
 const simulateEvent = (triggerNode, videoId, likes, message) => {
     const payload = {
-        timestamp: '개념적 시간',
+        timestamp: new Date().toISOString(), // 실제 시간 스탬프 사용
         videoId: videoId,
         newLikes: likes,
         message: message
     };
-    triggerNode.strategy.notify(payload);
+    if (triggerNode && triggerNode.wrappedComponent && triggerNode.wrappedComponent.strategy) {
+        triggerNode.wrappedComponent.strategy.notify(payload);
+    } else {
+        console.error("[app.js] 시뮬레이션 오류: 트리거 노드의 전략을 찾을 수 없습니다. 데코레이터 또는 노드 구조를 확인하세요.");
+    }
 };
-console.log("\n--- 메멘토 패턴 시연 (간소화 - 연속 빌드) ---\n");
+console.log("\n--- 메멘토 패턴 시연 (간소화 - 연속 빌드) ---\n"); //
 
-const mementoRunner = new WorkflowRunnerFacade();
-const caretaker = new WorkflowCaretaker();
+const mementoRunner = new WorkflowRunnerFacade(); //
+const caretaker = new WorkflowCaretaker(); //
 const mementoComposer = new WorkflowComposerFacade(); // Memento 데모를 위한 전용 컴포저
+
+// EventStore 인스턴스 가져오기 (이벤트 확인용)
+const eventStore = mementoComposer.getEventStore();
 
 let dynamicWorkflow; // 현재 작업 중인 워크플로우 인스턴스를 담을 변수
 let currentTriggerNode = null; // 트리거 노드 참조를 위한 변수
 const MEMENTO_TRIGGER_ID = 'DynamicTrigger_Memento'; // Memento 데모용 트리거 ID
+const SLACK_READ_CHANNEL_ID = 'general'; // 읽을 Slack 채널 ID (예시)
+
 
 // 1단계: 초기 빈 워크플로우 시작 및 상태 저장
-// mementoComposer는 이제 build() 후에도 currentWorkflow를 유지합니다.
 dynamicWorkflow = mementoComposer.startNewWorkflow().build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] 초기 빈 워크플로우 상태 저장.");
@@ -48,28 +60,36 @@ mementoComposer.addGmailTriggerNode(MEMENTO_TRIGGER_ID, 'localGmail', 'immediate
 dynamicWorkflow = mementoComposer.build(); // 변경된 워크플로우 인스턴스 반환
 caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] 트리거 노드 추가 및 상태 저장.");
-currentTriggerNode = dynamicWorkflow.nodes[0]; // 첫 번째 노드가 항상 트리거임을 가정
+currentTriggerNode = dynamicWorkflow.nodes[0]; // 데코레이터로 감싸진 트리거 노드
 
 
-// 3단계: Slack 메시지 노드 추가 및 상태 저장
-// mementoComposer는 이전 상태의 워크플로우를 내부적으로 유지하고 있습니다.
-mementoComposer.addSlackMessageNode('#dynamic-channel', '동적 워크플로우 Slack 메시지');
-dynamicWorkflow = mementoComposer.build(); // 변경된 워크플로우 인스턴스 반환
+// 3단계: Slack 채널 읽기 노드 추가 및 상태 저장
+mementoComposer.addSlackReadChannelNode(SLACK_READ_CHANNEL_ID);
+dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
-console.log("[메멘토] Slack 노드 추가 및 상태 저장.");
+console.log("[메멘토] Slack 채널 읽기 노드 추가 및 상태 저장.");
 
 
-// 4단계: Notion 페이지 생성 노드 추가 및 상태 저장
-// mementoComposer는 이전 상태의 워크플로우를 내부적으로 유지하고 있습니다.
+// 4단계: Slack 메시지 노드 추가 및 상태 저장
+mementoComposer.addSlackMessageNode('#dynamic-channel', '동적 워크플로우 Slack 메시지');
+dynamicWorkflow = mementoComposer.build();
+caretaker.saveMemento(dynamicWorkflow.createMemento());
+console.log("[메멘토] Slack 메시지 노드 추가 및 상태 저장.");
+
+
+// 5단계: Notion 페이지 생성 노드 추가 및 상태 저장
 mementoComposer.addNotionPageCreateNode('동적 Notion 페이지', '동적 워크플로우 Notion 내용');
-dynamicWorkflow = mementoComposer.build(); // 변경된 워크플로우 인스턴스 반환
+dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] Notion 노드 추가 및 상태 저장.");
-console.log("-> 현재 워크플로우 노드:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(', '));
+// 참고: 여기서는 모든 노드가 WorkflowExecutionLoggerDecorator로 감싸져 있습니다.
+console.log("-> 현재 워크플로우 노드 구성:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(' -> '));
 
 // 최종 워크플로우 실행 시뮬레이션
 console.log("\n--- 최종 워크플로우 실행 시뮬레이션 ---");
-mementoRunner.runWorkflow(dynamicWorkflow);
+// 워크플로우 실행 시, 워크플로우의 ID를 initialContext에 넣어줍니다.
+const workflowIdForRun = dynamicWorkflow.id || 'simulated-workflow-1'; // SequentialWorkflow에 ID를 추가했다면 dynamicWorkflow.id 사용
+mementoRunner.runWorkflow(dynamicWorkflow, { workflowId: workflowIdForRun });
 simulateEvent(currentTriggerNode, 'video_final', 100, '최종 워크플로우 실행');
 
 
@@ -77,16 +97,24 @@ simulateEvent(currentTriggerNode, 'video_final', 100, '최종 워크플로우 �
 console.log("\n--- 롤백 시연 시작 ---");
 
 // Notion 노드 추가 이전 상태로 롤백
-caretaker.getMemento(); // 현재 상태 Memento를 스택에서 제거 (버림)
-const previousMemento = caretaker.getMemento(); // Notion 노드 추가 전 상태의 Memento를 가져옴
+caretaker.getMemento();
+const previousMemento = caretaker.getMemento();
 
-dynamicWorkflow.restoreFromMemento(previousMemento); // Originator에게 복원 지시
+dynamicWorkflow.restoreFromMemento(previousMemento);
 console.log("[메멘토] Notion 노드 제거 후 롤백 완료.");
 console.log("-> 롤백 후 워크플로우 노드:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(', '));
 
 // 롤백된 상태의 워크플로우 실행 시뮬레이션
 console.log("\n--- 롤백 후 워크플로우 실행 시뮬레이션 ---");
-mementoRunner.runWorkflow(dynamicWorkflow);
+// 롤백 후 워크플로우 실행 시에도 워크플로우 ID를 전달합니다.
+const workflowIdForRollback = dynamicWorkflow.id || 'simulated-workflow-2';
+mementoRunner.runWorkflow(dynamicWorkflow, { workflowId: workflowIdForRollback });
 simulateEvent(currentTriggerNode, 'video_rollback', 70, '롤백 후 워크플로우 실행');
+
+// 최종 이벤트 저장소 내용 확인 (디버깅/테스트용)
+console.log("\n--- 기록된 모든 이벤트 ---");
+eventStore.getAllEvents().forEach(event => {
+    console.log(`[Event: ${event.type}] Node: ${event.nodeName}, Time: ${new Date(event.timestamp).toLocaleTimeString()}, `);
+});
 
 console.log("\n--- 메멘토 패턴 시연 완료 ---");

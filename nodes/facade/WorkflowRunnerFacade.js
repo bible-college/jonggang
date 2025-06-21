@@ -10,10 +10,12 @@ class WorkflowRunnerFacade {
 
     runWorkflow(workflowComponent) {
         // 워크플로우의 첫 번째 노드가 존재하고 트리거 노드인지 확인합니다.
-        const firstNode = (workflowComponent.nodes && workflowComponent.nodes.length > 0)
+        let firstNode = (workflowComponent.nodes && workflowComponent.nodes.length > 0)
             ? workflowComponent.nodes[0]
             : null;
-
+        if (firstNode && firstNode.wrappedComponent) { //
+            firstNode = firstNode.wrappedComponent;
+        }
         // --- 퍼사드가 제공하는 단순화된 실행 로직 ---
         if (firstNode instanceof AbstractTriggerNode) {
             console.log(`[RunnerFacade] 트리거 노드 감지: 워크플로우 실행을 트리거에 위임.`);
@@ -25,7 +27,7 @@ class WorkflowRunnerFacade {
             const triggerListener = (payload) => {
                 console.log(`[RunnerFacade] 트리거 이벤트 발생: 워크플로우 실행 시작. (Payload: ${JSON.stringify(payload)})`);
                 this.executor.setWorkflow(workflowComponent); // 실행할 워크플로우 설정
-                this.executor.runWorkflow(); // 워크플로우 실행 지시
+                this.executor.runWorkflow({ triggerPayload: payload }); // 변경된 부분
             };
             firstNode.onTrigger(triggerListener); // AbstractTriggerNode의 onTrigger 호출
             this.activeTriggers.set(firstNode, { triggerNode: firstNode, listener: triggerListener, workflow: workflowComponent });

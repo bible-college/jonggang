@@ -18,12 +18,14 @@ class WorkflowExecutor {
      * 이는 워크플로우 컴포넌트의 execute() 메서드를 호출하는 것으로,
      * 커맨드 객체(WorkflowComponent)의 execute()를 요청하는 인보커의 역할입니다.
      */
-    runWorkflow() {
+    runWorkflow(initialContext = {}) {
         if (this.workflow) {
             console.log(`[WorkflowExecutor] 워크플로우 실행 지시.`);
-            this.workflow.execute(); // 워크플로우 컴포넌트(커맨드)의 execute() 호출
+            const finalContext = this.workflow.execute(initialContext); // 워크플로우 실행 및 최종 컨텍스트 받기
+            return finalContext; // 최종 컨텍스트 반환
         } else {
             console.warn("[WorkflowExecutor] 실행할 워크플로우가 설정되지 않았습니다.");
+            return {};
         }
     }
 }

@@ -37,11 +37,16 @@ class SlackMessageNode extends WorkflowComponent {
 
     // WorkflowComponent의 execute()를 구현합니다.
     // 이제 이 execute()는 단순히 내부 커맨드의 execute()를 호출합니다.
-    execute() {
-        console.log(`[SlackMessageNode] 노드 실행: 내부 커맨드 호출 준비.`);
-        this.command.execute(); // 노드가 가진 커맨드를 실행
-        console.log(`[SlackMessageNode] 노드 실행 완료.`);
-        return true;
+    execute(context = {}) { // context 인자 추가
+        console.log(`[SlackMessageNode] 노드 실행: 내부 커맨드 호출 준비. 이전 컨텍스트:`, context);
+        // 예를 들어, 이전 노드에서 읽어온 slackReadChannelResult를 메시지에 포함
+        const messageFromReadChannel = context.slackReadMessageContent;
+        const finalMessage = `${this.message}. 이전 Slack 채널 읽기 결과: "${messageFromReadChannel}"'}`;
+        const dynamicCommand = new SlackMessageCommand(this.receiver, this.channel, finalMessage);
+        dynamicCommand.execute();
+        console.log(`[SlackMessageNode] 커맨드 실행 완료.`);
+        
+        return { ...context, slackMessageSent: true, finalSlackMessage: finalMessage }; // 전송된 최종 메시지도 context에 추가
     }
 }
 
