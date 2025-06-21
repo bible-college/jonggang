@@ -1,11 +1,15 @@
 // src/nodes/facade/WorkflowComposerFacade.js
 
-const SequentialWorkflow = require('../composites/SequentialWorkflow'); //
-const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory'); //
-const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory'); //
-const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode'); //
-const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy'); //
-const Registry = require('../../core/Registry'); // Registry 임포트
+const SequentialWorkflow = require('../composites/SequentialWorkflow');
+const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
+const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
+const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
+const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
+const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
+const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
+
+// Registry 임포트
+const Registry = require('../../core/Registry');
 
 const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator'); 
 const EventStore = require('../../core/EventStore'); // EventStore 임포트
@@ -71,7 +75,21 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(youtubeTrigger);
         return this;
     }
-
+    
+    addGmailTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
+        // currentWorkflow가 항상 유효하다고 가정
+        const implementation = Registry.createImplementation(implementationType);
+        const GmailStrategy = new GmailTriggerStrategy(implementation, notificationType, threshold);
+        let GmailTrigger = new GmailTriggerNode(videoId, GmailStrategy);
+        GmailTrigger = new WorkflowExecutionLoggerDecorator(GmailTrigger, this.eventStore); // eventStore 전달
+        this.currentWorkflow.add(GmailTrigger);
+        return this;
+    }
+    /**
+     * 현재 구성 중인 워크플로우를 완성하고 반환합니다.
+     * 이 메서드는 퍼사드의 내부 currentWorkflow를 null로 초기화하지 않습니다.
+     * @returns {SequentialWorkflow} 구성된 워크플로우 객체
+     */
     build() {
         const builtWorkflow = this.currentWorkflow;
         return builtWorkflow;

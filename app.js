@@ -6,11 +6,11 @@ const WorkflowRunnerFacade = require('./nodes/facade/WorkflowRunnerFacade'); //
 const Registry = require('./core/Registry'); //
 
 // 레지스트리 패턴을 위해, 사용될 구현체 모듈들을 여기서 로드합니다.
-require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation'); //
-require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation'); //
+//require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation'); //
+//require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation'); //
 // Gmail 관련 파일이 있다면 여기에 추가
-// require('./nodes/triggers/Gmail/LocalGmailPollingImplementation');
-// require('./nodes/triggers/Gmail/CloudGmailWebhookImplementation');
+ require('./nodes/triggers/Gmail/LocalGmailPollingImplementation');
+ require('./nodes/triggers/Gmail/CloudGmailWebhookImplementation');
 // require('./nodes/triggers/Gmail/GmailTriggerStrategy');
 // require('./nodes/triggers/Gmail/GmailTriggerNode');
 
@@ -53,9 +53,11 @@ caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] 초기 빈 워크플로우 상태 저장.");
 
 
-// 2단계: 트리거 노드 추가 및 상태 저장 (YouTubeLikeTriggerNode)
-mementoComposer.addYouTubeLikeTriggerNode(MEMENTO_TRIGGER_ID, 'local', 'immediate'); 
-dynamicWorkflow = mementoComposer.build();
+// 2단계: YouTubeLikeTriggerNode 추가 및 상태 저장
+// mementoComposer는 이전 상태의 워크플로우를 내부적으로 유지하고 있으므로, continueWorkflow 호출이 필요 없습니다.
+
+mementoComposer.addGmailTriggerNode(MEMENTO_TRIGGER_ID, 'localGmail', 'immediate');
+dynamicWorkflow = mementoComposer.build(); // 변경된 워크플로우 인스턴스 반환
 caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] 트리거 노드 추가 및 상태 저장.");
 currentTriggerNode = dynamicWorkflow.nodes[0]; // 데코레이터로 감싸진 트리거 노드
