@@ -10,7 +10,7 @@ class WorkflowComponent {
      * 모든 구체적인 노드와 복합 워크플로우는 이 메서드를 구현해야 합니다.
      * @returns {boolean} 작업 성공 여부
      */
-    execute() {
+    execute(context = {}) {
         throw new Error('execute() must be implemented by concrete components.');
     }
 

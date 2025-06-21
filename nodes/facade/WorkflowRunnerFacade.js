@@ -25,7 +25,7 @@ class WorkflowRunnerFacade {
             const triggerListener = (payload) => {
                 console.log(`[RunnerFacade] 트리거 이벤트 발생: 워크플로우 실행 시작. (Payload: ${JSON.stringify(payload)})`);
                 this.executor.setWorkflow(workflowComponent); // 실행할 워크플로우 설정
-                this.executor.runWorkflow(); // 워크플로우 실행 지시
+                this.executor.runWorkflow({ triggerPayload: payload }); // 변경된 부분
             };
             firstNode.onTrigger(triggerListener); // AbstractTriggerNode의 onTrigger 호출
             this.activeTriggers.set(firstNode, { triggerNode: firstNode, listener: triggerListener, workflow: workflowComponent });

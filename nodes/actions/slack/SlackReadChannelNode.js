@@ -46,11 +46,12 @@ class SlackReadChannelNode extends WorkflowComponent {
 
     // WorkflowComponent의 execute()를 구현합니다.
     // 이제 이 execute()는 단순히 내부 커맨드의 execute()를 호출합니다.
-    execute() {
+    execute(context = {}) {
         console.log(`[SlackReadChannelNode] 노드 실행: 내부 커맨드 호출 준비.`);
-        const result = this.command.execute(); // 노드가 가진 커맨드를 실행
+        const readMessage = this.command.execute(); // 노드가 가진 커맨드를 실행
         console.log(`[SlackReadChannelNode] 노드 실행 완료.`);
-        return result; // 커맨드 실행 결과 반환 (읽어온 메시지)
+        // 실행 결과를 context에 추가하고 반환
+        return { ...context, slackReadMessageContent: readMessage }; // 새로운 속성
     }
 }
 

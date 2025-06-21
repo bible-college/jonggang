@@ -46,11 +46,12 @@ class NotionPageCreateNode extends WorkflowComponent {
         this.command = new NotionPageCreateCommand(this.receiver, pageTitle, content);
     }
 
-    execute() {
+    execute(context = {}) {
         console.log(`[NotionPageCreateNode] 노드 실행: 내부 커맨드 호출 준비.`);
         this.command.execute();
         console.log(`[NotionPageCreateNode] 노드 실행 완료.`);
-        return true;
+        // 실행 결과를 context에 추가하고 반환
+        return { ...context, notionPageCreated: true, createdPageTitle: this.pageTitle };
     }
 }
 
