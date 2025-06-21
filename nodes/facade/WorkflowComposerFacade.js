@@ -97,15 +97,13 @@ class WorkflowComposerFacade {
         return this;
     }
     
-    addGmailTriggerNode(accountId, implementationType = 'local', notificationType = 'immediate', threshold = 0) {
-        
-        const ImplementationClass = Registry.createImplementation(implementationType + 'Gmail') 
-        const implementationInstance = new ImplementationClass();
-        const strategy = new GmailTriggerStrategy(implementationInstance, notificationType, threshold);
-        const node = new GmailTriggerNode(accountId, strategy);
-
-        this.currentWorkflow.addNode(node);
-    return this;
+    addGmailTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
+        // currentWorkflow가 항상 유효하다고 가정
+        const implementation = Registry.createImplementation(implementationType);
+        const GmailStrategy = new GmailTriggerStrategy(implementation, notificationType, threshold);
+        const GmailTrigger = new GmailTriggerNode(videoId, GmailStrategy);
+        this.currentWorkflow.add(GmailTrigger);
+        return this;
     }
     /**
      * 현재 구성 중인 워크플로우를 완성하고 반환합니다.

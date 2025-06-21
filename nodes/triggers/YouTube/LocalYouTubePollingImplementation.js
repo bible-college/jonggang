@@ -28,6 +28,6 @@ class LocalYouTubePollingImplementation extends ITriggerImplementation {
 }
 
 // 이 모듈이 로드될 때 자체적으로 레지스트리에 등록
-Registry.registerImplementation('local', () => new LocalYouTubePollingImplementation());
+Registry.registerImplementation('localYouTube', () => new LocalYouTubePollingImplementation());
 
 module.exports = LocalYouTubePollingImplementation;
