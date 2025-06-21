@@ -12,7 +12,48 @@ require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
 // Caretaker 및 SequentialWorkflow 임포트만 유지.
 const WorkflowCaretaker = require('./core/WorkflowCaretaker');
 
-// 시뮬레이션 헬퍼 함수를 전역 스코프로 이동
+// --- 로컬 폴링 기반 유튜브 좋아요 트리거 워크플로우 (즉시 알림) ---
+console.log("\n--- 로컬 폴링 기반 유튜브 좋아요 트리거 워크플로우 (즉시 알림) ---");
+const triggerNodeId_local_immediate = 'LocalTrigger_Immediate';
+const youtube_save_local_immediate = composer
+    .startNewWorkflow()
+    .addYouTubeLikeTriggerNode(triggerNodeId_local_immediate, 'local', 'immediate') // 'local' 구현체, 'immediate' 전략
+    .addSlackMessageNode('#local-updates', `[${triggerNodeId_local_immediate}] 좋아요 감지 (즉시)!`)
+    .addNotionPageCreateNode(`노션 좋아요 감지 (배치)!`, '개념적 웹훅을 통해 감지된 배치 이벤트입니다.')
+    .build();
+
+runner.runWorkflow(youtube_save_local_immediate);
+
+
+// // --- 클라우드 웹훅 기반 유튜브 좋아요 트리거 워크플로우 (배치 알림) ---
+// console.log("\n--- 클라우드 웹훅 기반 유튜브 좋아요 트리거 워크플로우 (배치 알림) ---");
+// const triggerNodeId_cloud_batch = 'CloudTrigger_Batch';
+// const youtube_save_cloud_batch = composer
+//     .startNewWorkflow()
+//     .addYouTubeLikeTriggerNode(triggerNodeId_cloud_batch, 'cloud', 'batch') // 'cloud' 구현체, 'batch' 전략
+//     .addNotionPageCreateNode(`[${triggerNodeId_cloud_batch}] 좋아요 감지 (배치)!`, '개념적 웹훅을 통해 감지된 배치 이벤트입니다.')
+//     .build();
+
+// runner.runWorkflow(youtube_save_cloud_batch);
+
+
+// // --- 로컬 폴링 기반 유튜브 좋아요 트리거 워크플로우 (임계치 알림) ---
+// console.log("\n--- 로컬 폴링 기반 유튜브 좋아요 트리거 워크플로우 (임계치 알림) ---");
+// const triggerNodeId_local_threshold = 'LocalTrigger_Threshold';
+// const youtube_save_local_threshold = composer
+//     .startNewWorkflow()
+//     .addYouTubeLikeTriggerNode(triggerNodeId_local_threshold, 'local', 'threshold', 5) // 'local' 구현체, 'threshold' 전략 (변화 5 이상)
+//     .addSlackMessageNode('#local-threshold', `[${triggerNodeId_local_threshold}] 좋아요 감지 (임계치)!`)
+//     .build();
+
+// runner.runWorkflow(youtube_save_local_threshold);
+
+
+// ***** 중요: 이제 구현체 자체에서 자동 트리거 로직을 제거했으므로, *****
+// ***** 워크플로우의 트리거를 시뮬레이션하기 위해서는 이 코드가 필수적입니다. *****
+console.log("\n--- 외부에서 유튜브 좋아요 트리거 이벤트 강제 발생 시뮬레이션 ---");
+
+// 시뮬레이션 헬퍼 함수
 const simulateEvent = (triggerNode, videoId, likes, message) => {
     const payload = {
         timestamp: '개념적 시간',
