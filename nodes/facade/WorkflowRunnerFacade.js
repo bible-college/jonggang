@@ -4,7 +4,7 @@ const AbstractTriggerNode = require('../triggers/AbstractTriggerNode');
 
 class WorkflowRunnerFacade {
     constructor() {
-        this.executor = new WorkflowExecutor();
+        // this.executor = new WorkflowExecutor();
         this.activeTriggers = new Map();
     }
 
@@ -28,12 +28,26 @@ class WorkflowRunnerFacade {
 
             // 2. 트리거 이벤트 발생 시 워크플로우를 실행하도록 리스너를 등록합니다.
             const triggerListener = (payload) => {
-                console.log(`[RunnerFacade] 트리거 이벤트 발생: 워크플로우 실행 시작. (Payload: ${JSON.stringify(payload)})`);
-                this.executor.setWorkflow(workflowComponent); // 실행할 워크플로우 설정
-                this.executor.runWorkflow(); // 워크플로우 실행 지시
+                // console.log(`[RunnerFacade] 트리거 이벤트 발생: 워크플로우 실행 시작. (Payload: ${JSON.stringify(payload)})`);
+                // this.executor.setWorkflow(workflowComponent); // 실행할 워크플로우 설정
+                // this.executor.runWorkflow(); // 워크플로우 실행 지시
+                // 트리거를 제외한 나머지 '액션' 노드들만 순서대로 실행합니다.
+                const actionNodes = workflowComponent.nodes.slice(1);
+                for (const actionNode of actionNodes) {
+                    try {
+                        // 데코레이터로 감싸진 액션 노드를 직접 실행시켜 로그를 남깁니다.
+                        actionNode.execute();
+                    } catch (error) {
+                        console.error(`[RunnerFacade] '${actionNode.nodeName}' 실행 중 오류 발생:`, error);
+                        break;
+                    }
+                }
             };
+            
             firstNode.onTrigger(triggerListener); // AbstractTriggerNode의 onTrigger 호출
-            this.activeTriggers.set(firstNode, { triggerNode: firstNode, listener: triggerListener, workflow: workflowComponent });
+            console.log(`[RunnerFacade] '${firstNode.nodeName}'의 감지를 시작합니다.`);
+            firstNode.execute();
+            // this.activeTriggers.set(firstNode, { triggerNode: firstNode, listener: triggerListener, workflow: workflowComponent });
 
             // 3. 트리거 노드의 감시 시작을 지시합니다.
             //    **여기가 수정될 부분입니다.**
