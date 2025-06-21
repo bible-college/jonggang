@@ -7,31 +7,43 @@ const Registry = require('./core/Registry');
 
 const EventStore = require('./core/EventStore'); // EventStore 임포트
 const NodeExecutionDecorator = require('./core/NodeExecutionDecorator'); // 데코레이터 임포트
+const SequentialWorkflow = require('./nodes/composites/SequentialWorkflow');
 
 // 레지스트리 패턴을 위해, 사용될 구현체 모듈들을 여기서 로드합니다.
 require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation');
 require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
 
-console.log("\n--- 데코레이터 및 이벤트 소싱 패턴 시연 (uuid 없음) ---");
+console.log("\n--- 데코레이터 및 이벤트 소싱 패턴 (최종 수정안) ---");
 
 const composer = new WorkflowComposerFacade();
 const runner = new WorkflowRunnerFacade();
 
-// 1. 원본 워크플로우를 구성합니다.
+// 1. Facade를 사용하여 '원본' 워크플로우를 평소처럼 구성합니다.
+//    이 워크플로우는 순수한 원본 노드들만 가지고 있습니다.
 const originalWorkflow = composer.startNewWorkflow()
-    .addYouTubeLikeTriggerNode('video-no-uuid-456', 'local', 'immediate')
-    .addSlackMessageNode('#general-logs', '새로운 유튜브 좋아요가 감지되었습니다.')
-    .addNotionPageCreateNode('자동 생성 페이지', '이벤트 소싱 로그 기록')
+    .addYouTubeLikeTriggerNode('video-final-789', 'local', 'immediate')
+    .addSlackMessageNode('#final-logs', '최종 수정: 새로운 좋아요 감지!')
+    .addNotionPageCreateNode('최종 워크플로우', '모든 로그가 정상 기록되었습니다.')
     .build();
 
-// 2. 워크플로우의 모든 노드를 데코레이터로 감쌉니다.
-originalWorkflow.nodes = originalWorkflow.nodes.map(node => new NodeExecutionDecorator(node));
-const decoratedWorkflow = new NodeExecutionDecorator(originalWorkflow);
 
-// 3. 데코레이터가 적용된 워크플로우를 실행 준비시킵니다.
+// 2. *** 핵심 해결 부분 ***
+//    실행기(Runner)에게 전달할 '실행 전용' 워크플로우를 새로 만듭니다.
+const decoratedWorkflow = new SequentialWorkflow();
+
+// 3. 원본 워크플로우의 노드들을 하나씩 꺼내서 데코레이터로 감싼 뒤,
+//    새로운 '실행 전용' 워크플로우에 추가합니다.
+for (const originalNode of originalWorkflow.nodes) {
+    const decoratedNode = new NodeExecutionDecorator(originalNode);
+    decoratedWorkflow.add(decoratedNode);
+}
+
+
+// 4. 모든 노드가 데코레이터로 완벽하게 감싸진 `decoratedWorkflow`를 실행기에게 전달합니다.
 runner.runWorkflow(decoratedWorkflow);
 
-// 4. 외부 이벤트를 시뮬레이션하여 워크플로우를 실행시킵니다.
+
+// 5. 외부 이벤트를 시뮬레이션하여 워크플로우를 실행시킵니다.
 const simulateEvent = (triggerNode, videoId) => {
     console.log(`\n>>> 이벤트 시뮬레이션 시작: 비디오 ID '${videoId}'`);
     const payload = {
@@ -42,14 +54,15 @@ const simulateEvent = (triggerNode, videoId) => {
     triggerNode.strategy.notify(payload);
 };
 
+// 실행 전용 워크플로우의 첫 번째 노드(데코레이팅된 트리거)를 가져옵니다.
 const triggerNodeInWorkflow = decoratedWorkflow.nodes[0];
-simulateEvent(triggerNodeInWorkflow, 'video-no-uuid-456');
+simulateEvent(triggerNodeInWorkflow, 'video-final-789');
 
 
-// 5. 실행이 끝난 후, EventStore에 기록된 모든 로그를 출력합니다.
+// 6. 실행이 끝난 후, EventStore에 기록된 모든 로그를 출력합니다.
 console.log("\n--- 모든 노드 실행 이벤트 로그 ---");
 const allEvents = EventStore.getAllEvents();
-console.table(allEvents); // 테이블 형태로 깔끔하게 출력합니다.
+console.table(allEvents);
 
 
 /**임시 제거
