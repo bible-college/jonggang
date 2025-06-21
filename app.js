@@ -13,53 +13,43 @@ const SequentialWorkflow = require('./nodes/composites/SequentialWorkflow');
 require('./nodes/triggers/YouTube/LocalYouTubePollingImplementation');
 require('./nodes/triggers/YouTube/CloudYouTubeWebhookImplementation');
 
-console.log("\n--- 데코레이터 및 이벤트 소싱 패턴 (최종 수정안) ---");
+console.log("\n--- '똑똑한 지휘자' 패턴 시연 ---");
 
 const composer = new WorkflowComposerFacade();
 const runner = new WorkflowRunnerFacade();
 
-// 1. Facade를 사용하여 '원본' 워크플로우를 평소처럼 구성합니다.
-//    이 워크플로우는 순수한 원본 노드들만 가지고 있습니다.
+// 1. 원본 워크플로우 구성
 const originalWorkflow = composer.startNewWorkflow()
-    .addYouTubeLikeTriggerNode('video-final-789', 'local', 'immediate')
-    .addSlackMessageNode('#final-logs', '최종 수정: 새로운 좋아요 감지!')
-    .addNotionPageCreateNode('최종 워크플로우', '모든 로그가 정상 기록되었습니다.')
+    .addYouTubeLikeTriggerNode('video-smart-runner-456', 'local', 'immediate')
+    .addSlackMessageNode('#smart-runner', '지휘자 패턴: 좋아요 감지!')
+    .addNotionPageCreateNode('지휘자 패턴 워크플로우', '성공적으로 실행됨.')
     .build();
 
-
-// 2. *** 핵심 해결 부분 ***
-//    실행기(Runner)에게 전달할 '실행 전용' 워크플로우를 새로 만듭니다.
+// 2. 실행 전용 워크플로우 생성 및 데코레이터 적용
 const decoratedWorkflow = new SequentialWorkflow();
-
-// 3. 원본 워크플로우의 노드들을 하나씩 꺼내서 데코레이터로 감싼 뒤,
-//    새로운 '실행 전용' 워크플로우에 추가합니다.
 for (const originalNode of originalWorkflow.nodes) {
     const decoratedNode = new NodeExecutionDecorator(originalNode);
     decoratedWorkflow.add(decoratedNode);
 }
 
-
-// 4. 모든 노드가 데코레이터로 완벽하게 감싸진 `decoratedWorkflow`를 실행기에게 전달합니다.
+// 3. 실행
 runner.runWorkflow(decoratedWorkflow);
 
-
-// 5. 외부 이벤트를 시뮬레이션하여 워크플로우를 실행시킵니다.
-const simulateEvent = (triggerNode, videoId) => {
+// 4. 이벤트 시뮬레이션
+const simulateEvent = (decoratedTriggerNode, videoId) => {
     console.log(`\n>>> 이벤트 시뮬레이션 시작: 비디오 ID '${videoId}'`);
-    const payload = {
-        timestamp: new Date().toISOString(),
-        videoId: videoId,
-        message: "외부 이벤트 발생!"
-    };
-    triggerNode.strategy.notify(payload);
+    const payload = { videoId: videoId, message: "외부 이벤트 발생!" };
+
+    // 포장지 안의 '원본' 트리거 노드를 꺼냅니다.
+    const originalTrigger = decoratedTriggerNode.wrappedComponent;
+    // strategy 속성은 원본 노드에만 있으므로, 원본을 통해 접근합니다.
+    originalTrigger.strategy.notify(payload);
 };
 
-// 실행 전용 워크플로우의 첫 번째 노드(데코레이팅된 트리거)를 가져옵니다.
 const triggerNodeInWorkflow = decoratedWorkflow.nodes[0];
-simulateEvent(triggerNodeInWorkflow, 'video-final-789');
+simulateEvent(triggerNodeInWorkflow, 'video-smart-runner-456');
 
-
-// 6. 실행이 끝난 후, EventStore에 기록된 모든 로그를 출력합니다.
+// 5. 로그 출력
 console.log("\n--- 모든 노드 실행 이벤트 로그 ---");
 const allEvents = EventStore.getAllEvents();
 console.table(allEvents);
