@@ -1,5 +1,5 @@
-// src/handlers/WorkflowTerminationHandler.js (새로 생성)
-const IWorkflowExecutionHandler = require("../core/IWorkflowExecutionHandler"); // 인터페이스 파일 경로
+// src/handlers/WorkflowTerminationHandler.js
+const IWorkflowExecutionHandler = require("../handlers/IWorkflowExecutionHandler"); // 인터페이스 파일 경로
 
 /**
  * @class WorkflowTerminationHandler

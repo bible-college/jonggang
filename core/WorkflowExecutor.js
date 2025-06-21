@@ -1,5 +1,5 @@
-// src/core/WorkflowExecutor.js (수정)
-const WorkflowComponent = require("./WorkflowComponent"); // WorkflowComponent import 추가
+// src/core/WorkflowExecutor.js
+const WorkflowComponent = require("../core/WorkflowComponent"); // WorkflowComponent import 추가
 const ExecutionLoggerHandler = require("../handlers/ExecutionLoggerHandler");
 const FailureNotificationHandler = require("../handlers/FailureNotificationHandler");
 const WorkflowTerminationHandler = require("../handlers/WorkflowTerminationHandler");

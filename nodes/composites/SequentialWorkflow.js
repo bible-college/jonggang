@@ -1,6 +1,6 @@
-// src/nodes/composites/SequentialWorkflow.js (수정)
+// src/nodes/composites/SequentialWorkflow.js
 const WorkflowComponent = require("../../core/WorkflowComponent");
-const IWorkflowExecutionHandler = require("../../core/IWorkflowExecutionHandler"); // 핸들러 인터페이스 추가 (타입 힌트 목적)
+const IWorkflowExecutionHandler = require("../../handlers/IWorkflowExecutionHandler"); // 핸들러 인터페이스 추가 (타입 힌트 목적)
 
 /**
  * @class SequentialWorkflow
@@ -13,10 +13,18 @@ class SequentialWorkflow extends WorkflowComponent {
     this.nodes = [];
   }
 
+  /**
+   * 자식 노드를 워크플로우에 추가합니다.
+   * @param {WorkflowComponent} component - 추가할 워크플로우 컴포넌트 (노드)
+   */
   add(component) {
     this.nodes.push(component);
   }
 
+  /**
+   * 자식 노드를 워크플로우에서 제거합니다. (현재 구현에서는 간단히 경고만 출력)
+   * @param {WorkflowComponent} component - 제거할 워크플로우 컴포넌트
+   */
   remove(component) {
     console.warn(
       `[SequentialWorkflow] remove() 메서드는 설계 모드에서 구현되지 않았습니다.`
@@ -30,10 +38,12 @@ class SequentialWorkflow extends WorkflowComponent {
    * 핸들러 체인이 워크플로우 중단을 지시하면, 즉시 실행을 중단합니다.
    *
    * @param {IWorkflowExecutionHandler} [executionHandlerChain=null] - 노드 실행 결과를 처리할 핸들러 체인
-   * @returns {boolean} 워크플로우가 성공적으로 완료되었으면 true, 중간에 중단되었으면 false
+   * @returns {{success: boolean, message: string}} 워크플로우가 성공적으로 완료되었으면 true를 포함한 객체, 중간에 중단되었으면 false를 포함한 객체
    */
   execute(executionHandlerChain = null) {
     console.log(`\n--- [SequentialWorkflow] 순차 워크플로우 실행 시작 ---`);
+    let overallSuccess = true;
+    let overallMessage = "워크플로우 성공적으로 완료.";
 
     // 유효한 핸들러 체인이 전달되었는지 확인 (옵션)
     if (
@@ -52,7 +62,7 @@ class SequentialWorkflow extends WorkflowComponent {
         message: "Node did not return a result.",
         error: null,
       };
-      let chainResult = { terminateWorkflow: false }; // 핸들러 체인의 결과 초기화
+      let chainResult = { terminateWorkflow: false, message: "" }; // 핸들러 체인의 결과 초기화
 
       try {
         // 각 노드의 execute() 메서드를 호출하고, 그 결과를 받습니다.
@@ -60,14 +70,18 @@ class SequentialWorkflow extends WorkflowComponent {
         nodeExecutionResult = node.execute({
           executionHandlerChain: executionHandlerChain,
         }); // 노드에 체인 전달 (선택적)
+        // execute() 결과가 예상된 객체 형태가 아닐 경우 처리
         if (
-          typeof nodeExecutionResult.success === "undefined" ||
-          nodeExecutionResult === null
+          typeof nodeExecutionResult !== "object" ||
+          nodeExecutionResult === null ||
+          typeof nodeExecutionResult.success === "undefined"
         ) {
-          // 노드가 예상된 결과 객체를 반환하지 않았을 경우 기본값 설정
+          console.warn(
+            `[SequentialWorkflow] 노드 '${node.constructor.name}'가 예상된 형식의 결과를 반환하지 않았습니다. 기본 성공으로 처리.`
+          );
           nodeExecutionResult = {
             success: true,
-            message: `Node '${node.constructor.name}' executed but returned no explicit result. Assuming success.`,
+            message: `Node '${node.constructor.name}' executed, but returned no explicit result. Assuming success.`,
             error: null,
           };
         }
@@ -83,23 +97,30 @@ class SequentialWorkflow extends WorkflowComponent {
       // 노드의 실행 결과를 핸들러 체인에 전달합니다.
       if (executionHandlerChain) {
         chainResult = executionHandlerChain.handle(node, nodeExecutionResult);
+      } else if (!nodeExecutionResult.success) {
+        // 핸들러 체인이 없는데 노드가 실패했다면, 워크플로우를 중단합니다.
+        overallSuccess = false;
+        overallMessage = `워크플로우 중단: 핸들러 체인 없이 노드 '${node.constructor.name}' 실패.`;
+        break; // 루프 중단
       }
 
       // 핸들러 체인이 워크플로우 중단을 지시했는지 확인합니다.
-      // 또는 현재 노드 자체가 실패했고 (terminateWorkflow가 true일 가능성이 높지만)
-      // 명시적으로 중단을 원하는 경우 추가 조건을 둘 수 있습니다.
       if (chainResult.terminateWorkflow) {
-        console.error(
-          `[SequentialWorkflow] 핸들러 체인에 의해 워크플로우 중단됨. 원인: ${
-            chainResult.message || "알 수 없음"
-          }`
-        );
-        return false; // 워크플로우 실패로 간주하고 종료
+        overallSuccess = false;
+        overallMessage = `핸들러 체인에 의해 워크플로우 중단됨. 원인: ${
+          chainResult.message || `노드 '${node.constructor.name}' 실패.`
+        }`;
+        console.error(`[SequentialWorkflow] ${overallMessage}`);
+        break; // 루프 중단
       }
     }
 
-    console.log(`--- [SequentialWorkflow] 순차 워크플로우 실행 완료 ---\n`);
-    return true; // 모든 노드가 성공적으로 실행되었음을 나타냅니다.
+    if (overallSuccess) {
+      console.log(`--- [SequentialWorkflow] 순차 워크플로우 실행 완료 ---\n`);
+    } else {
+      console.log(`--- [SequentialWorkflow] 순차 워크플로우 실행 중단 ---\n`);
+    }
+    return { success: overallSuccess, message: overallMessage };
   }
 }
 
