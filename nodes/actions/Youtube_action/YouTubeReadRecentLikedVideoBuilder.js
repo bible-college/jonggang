@@ -1,7 +1,7 @@
 // src/nodes/builders/youtube/YouTubeReadRecentLikedVideoBuilder.js
 // 빌더는 자신이 빌드할 노드를 임포트합니다.
 // 경로 수정: actions/youtube 폴더로 바로 이동합니다.
-const YouTubeReadRecentLikedVideoNode = require('../../actions/YoutubeLike/YouTubeReadRecentLikedVideoNode');
+const YouTubeReadRecentLikedVideoNode = require('./YouTubeReadRecentLikedVideoNode');
 
 /**
  * @class YouTubeReadRecentLikedVideoBuilder

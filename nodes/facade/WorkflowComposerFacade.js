@@ -3,6 +3,7 @@
 const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
+const DefaultYoutubeNodeFactory = require('../actions/Youtube_action/DefaultYoutubeNodeFactory')
 const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
 const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
 const YouTubeTriggerNode = require('../triggers/YouTube/YouTubeTriggerNode');
@@ -23,6 +24,7 @@ class WorkflowComposerFacade {
     constructor() {
         this.slackFactory = new DefaultSlackNodeFactory();
         this.notionFactory = new DefaultNotionNodeFactory();
+        this.youtubeFactory = new DefaultYoutubeNodeFactory();
         this.currentWorkflow = null;
         this.eventStore = new EventStore();
     }
@@ -86,7 +88,7 @@ class WorkflowComposerFacade {
      */
     // YouTubeReadRecentLikedVideoNode를 추가하는 메서드 (이제 this.slackFactory 사용)
     addYouTubeReadRecentLikedVideoNode() {
-        let youtubeReadRecentLikedVideoNode = this.slackFactory.createReadRecentLikedVideoBuilder().build(); // <-- 수정됨!
+        let youtubeReadRecentLikedVideoNode = this.youtubeFactory.createYouTubeReadRecentLikedVideoBuilder().build(); // <-- 수정됨!
         youtubeReadRecentLikedVideoNode = new WorkflowExecutionLoggerDecorator(youtubeReadRecentLikedVideoNode, this.eventStore);
         this.currentWorkflow.add(youtubeReadRecentLikedVideoNode);
         return youtubeReadRecentLikedVideoNode;

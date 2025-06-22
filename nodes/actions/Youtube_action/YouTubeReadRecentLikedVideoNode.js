@@ -1,5 +1,5 @@
 // src/nodes/actions/youtube/YouTubeReadRecentLikedVideoNode.js
-const WorkflowComponent = require('../../../core/WorkflowComponent');
+const Node = require('../../../core/Node');
 const ICommand = require('../../../core/ICommand'); // ICommand 인터페이스 임포트
 
 // --- YouTubeReadRecentLikedVideoReceiver 정의 (노드 파일 내부에 포함) ---
@@ -56,7 +56,7 @@ class YouTubeReadRecentLikedVideoCommand extends ICommand {
  * 해당 영상의 상세 정보를 읽어오는 워크플로우 노드.
  * Receiver와 Command 클래스가 이 파일 내부에 정의되어 있습니다.
  */
-class YouTubeReadRecentLikedVideoNode extends WorkflowComponent {
+class YouTubeReadRecentLikedVideoNode extends Node {
     /**
      * YouTubeReadRecentLikedVideoNode의 생성자.
      * 이 노드는 특정 초기 설정 인자가 필요 없습니다.
