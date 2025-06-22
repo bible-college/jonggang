@@ -4,8 +4,7 @@ const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
 const DefaultYoutubeNodeFactory = require('../actions/Youtube_action/DefaultYoutubeNodeFactory')
 const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
-const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
-const YouTubeTriggerNode = require('../triggers/YouTube/YouTubeTriggerNode');
+const TriggerNode = require('../triggers/TriggerNode');
 const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
 const Registry = require('../../core/Registry');
 const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator');
@@ -51,20 +50,20 @@ class WorkflowComposerFacade {
     }
 
     addYouTubeLikeTriggerNode(videoId, implementationType) { 
-        const implementation = Registry.createImplementation(implementationType);
-        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, videoId);
-        let youtubeTrigger = new YouTubeTriggerNode(videoId, youtubeLikeStrategy);
-        youtubeTrigger = new WorkflowExecutionLoggerDecorator(youtubeTrigger, this.eventStore);
-        this.currentWorkflow.add(youtubeTrigger);
+        const implementation = Registry.createImplementation(implementationType); 
+        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, videoId); 
+        let youtubeTrigger = new TriggerNode(videoId, youtubeLikeStrategy); 
+        youtubeTrigger = new WorkflowExecutionLoggerDecorator(youtubeTrigger, this.eventStore); 
+        this.currentWorkflow.add(youtubeTrigger); 
         return youtubeTrigger;
     }
 
     addGmailTriggerNode(accountId, implementationType) { 
-        const implementation = Registry.createImplementation(implementationType);
-        const gmailStrategy = new GmailTriggerStrategy(implementation, accountId);
-        let gmailTrigger = new GmailTriggerNode(accountId, gmailStrategy);
-        gmailTrigger = new WorkflowExecutionLoggerDecorator(gmailTrigger, this.eventStore);
-        this.currentWorkflow.add(gmailTrigger);
+        const implementation = Registry.createImplementation(implementationType); 
+        const gmailStrategy = new GmailTriggerStrategy(implementation, accountId); 
+        let gmailTrigger = new TriggerNode(accountId, gmailStrategy); 
+        gmailTrigger = new WorkflowExecutionLoggerDecorator(gmailTrigger, this.eventStore); 
+        this.currentWorkflow.add(gmailTrigger); 
         return gmailTrigger;
     }
 
