@@ -36,7 +36,7 @@ const eventStore = mementoComposer.getEventStore();
 
 let dynamicWorkflow;
 let currentTriggerNode = null;
-const MEMENTO_TRIGGER_ID_GMAIL = 'gmail_account_123';
+// const MEMENTO_TRIGGER_ID_GMAIL = 'gmail_account_123';
 const MEMENTO_TRIGGER_ID_YOUTUBE = 'youtube_video_abc';
 const SLACK_READ_CHANNEL_ID = 'general';
 
@@ -46,7 +46,7 @@ caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] 초기 빈 워크플로우 상태 저장.");
 
 // 2단계: YouTubeLikeTriggerNode 추가 (로컬 폴링 구현 사용) 및 상태 저장
-currentTriggerNode = mementoComposer.addYouTubeLikeTriggerNode(MEMENTO_TRIGGER_ID_YOUTUBE, 'local', 'immediate'); // 이제 add 메서드가 노드를 직접 반환
+currentTriggerNode = mementoComposer.addYouTubeLikeTriggerNode(MEMENTO_TRIGGER_ID_YOUTUBE, 'local'); // 이제 add 메서드가 노드를 직접 반환
 dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] YouTube 트리거 노드 (로컬 폴링) 추가 및 상태 저장.");

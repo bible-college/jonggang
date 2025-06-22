@@ -1,8 +1,8 @@
 // src/nodes/triggers/AbstractTriggerNode.js
-const WorkflowComponent = require('../../core/WorkflowComponent');
+const Node = require('../../core/Node');
 // ITriggerImplementation 직접 임포트 제거
 
-class AbstractTriggerNode extends WorkflowComponent {
+class AbstractTriggerNode extends Node {
     constructor() { // 생성자에서 triggerImplementation을 받지 않음
         super();
         if (new.target === AbstractTriggerNode) {

@@ -9,7 +9,7 @@ const YouTubeLikeTriggerStrategy = require('./YouTubeLikeTriggerStrategy'); // �
  * 또한, 컴포지트 패턴의 Leaf(리프) 노드로서 WorkflowComponent를 상속받습니다.
  * 옵저버 패턴에서 Strategy에 대한 Observer 역할을 직접 구현합니다.
  */
-class YouTubeLikeTriggerNode extends AbstractTriggerNode {
+class YouTubeTriggerNode extends AbstractTriggerNode {
     constructor(videoId, strategy) { // videoId는 이 노드 인스턴스의 식별자 역할을 합니다.
         super();
         this.videoId = videoId; // 노드 인스턴스에 고유 ID(비디오 ID) 부여
@@ -57,4 +57,4 @@ class YouTubeLikeTriggerNode extends AbstractTriggerNode {
     }
 }
 
-module.exports = YouTubeLikeTriggerNode;
+module.exports = YouTubeTriggerNode;

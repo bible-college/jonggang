@@ -3,7 +3,6 @@ const SlackMessageNode = require('../../actions/slack/SlackMessageNode');
 
 class SlackMessageNodeBuilder {
     constructor() {
-        // this.id = uuidv4(); // id 속성 제거
         this.channel = '';
         this.message = '';
     }

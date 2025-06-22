@@ -5,7 +5,7 @@ const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactor
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
 const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
 const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
-const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
+const YouTubeTriggerNode = require('../triggers/YouTube/YouTubeTriggerNode');
 const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
 const Registry = require('../../core/Registry');
 const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator');
@@ -85,30 +85,30 @@ class WorkflowComposerFacade {
      * @param {number} threshold - 임계치 (threshold 방식 사용 시)
      * @returns {WorkflowComponent} 추가된 YouTubeLikeTriggerNode 인스턴스
      */
-    addYouTubeLikeTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
+    addYouTubeLikeTriggerNode(videoId, implementationType) { // notificationType, threshold 인자 제거
         const implementation = Registry.createImplementation(implementationType);
-        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, videoId, notificationType, threshold);
-        let youtubeTrigger = new YouTubeLikeTriggerNode(videoId, youtubeLikeStrategy);
+        // youtubeLikeStrategy 생성 시 notificationType, threshold 인자 제거
+        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, videoId);
+        let youtubeTrigger = new YouTubeTriggerNode(videoId, youtubeLikeStrategy);
         youtubeTrigger = new WorkflowExecutionLoggerDecorator(youtubeTrigger, this.eventStore);
         this.currentWorkflow.add(youtubeTrigger);
-        return youtubeTrigger; // 추가된 노드를 직접 반환
+        return youtubeTrigger;
     }
 
     /**
      * Gmail 트리거 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
      * @param {string} accountId - 감지할 Gmail 계정 ID
      * @param {string} implementationType - 사용할 구현체 타입 ('localGmail', 'cloud' 등)
-     * @param {string} notificationType - 알림 방식 ('immediate', 'batch', 'threshold')
-     * @param {number} threshold - 임계치 (threshold 방식 사용 시)
      * @returns {WorkflowComponent} 추가된 GmailTriggerNode 인스턴스
      */
-    addGmailTriggerNode(accountId, implementationType, notificationType = 'immediate', threshold = 0) {
+    addGmailTriggerNode(accountId, implementationType) { // notificationType, threshold 인자 제거
         const implementation = Registry.createImplementation(implementationType);
-        const gmailStrategy = new GmailTriggerStrategy(implementation, accountId, notificationType, threshold);
+        // gmailStrategy 생성 시 notificationType, threshold 인자 제거
+        const gmailStrategy = new GmailTriggerStrategy(implementation, accountId);
         let gmailTrigger = new GmailTriggerNode(accountId, gmailStrategy);
         gmailTrigger = new WorkflowExecutionLoggerDecorator(gmailTrigger, this.eventStore);
         this.currentWorkflow.add(gmailTrigger);
-        return gmailTrigger; // 추가된 노드를 직접 반환
+        return gmailTrigger;
     }
 
     /**

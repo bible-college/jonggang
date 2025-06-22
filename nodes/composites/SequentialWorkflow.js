@@ -1,5 +1,5 @@
 // src/nodes/composites/SequentialWorkflow.js
-const WorkflowComponent = require('../../core/WorkflowComponent');
+const Node = require('../../core/Node');
 const WorkflowMemento = require('../../core/WorkflowMemento');
 
 /**
@@ -7,7 +7,7 @@ const WorkflowMemento = require('../../core/WorkflowMemento');
  * 여러 WorkflowComponent(리프 노드 또는 다른 복합 노드)를 순차적으로 실행하는 복합 노드.
  * 컴포지트 패턴의 Composite 역할과 메멘토 패턴의 Originator 역할을 합니다.
  */
-class SequentialWorkflow extends WorkflowComponent {
+class SequentialWorkflow extends Node {
     constructor() {
         super();
         this.nodes = [];

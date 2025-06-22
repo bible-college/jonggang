@@ -1,5 +1,5 @@
 // src/nodes/actions/slack/SlackReadChannelNode.js
-const WorkflowComponent = require('../../../core/WorkflowComponent');
+const Node = require('../../../core/Node');
 const ICommand = require('../../../core/ICommand');
 
 // Slack 채널 메시지 읽기 로직의 실제 수신자 (Receiver) 역할
@@ -35,7 +35,7 @@ class SlackReadChannelCommand extends ICommand {
  * Slack 채널 메시지 읽기 노드.
  * 컴포지트 패턴의 리프 노드 역할과, 내부적으로 커맨드 패턴을 활용합니다.
  */
-class SlackReadChannelNode extends WorkflowComponent {
+class SlackReadChannelNode extends Node {
     constructor(channelId) {
         super(); // WorkflowComponent 생성자 호출
         this.channelId = channelId;
