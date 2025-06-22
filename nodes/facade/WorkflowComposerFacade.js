@@ -5,7 +5,7 @@ const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactor
 const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
 const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
 const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
-const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
+const YouTubeTriggerNode = require('../triggers/YouTube/YouTubeTriggerNode');
 const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
 const Registry = require('../../core/Registry');
 const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator');
@@ -89,7 +89,7 @@ class WorkflowComposerFacade {
         const implementation = Registry.createImplementation(implementationType);
         // youtubeLikeStrategy 생성 시 notificationType, threshold 인자 제거
         const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, videoId);
-        let youtubeTrigger = new YouTubeLikeTriggerNode(videoId, youtubeLikeStrategy);
+        let youtubeTrigger = new YouTubeTriggerNode(videoId, youtubeLikeStrategy);
         youtubeTrigger = new WorkflowExecutionLoggerDecorator(youtubeTrigger, this.eventStore);
         this.currentWorkflow.add(youtubeTrigger);
         return youtubeTrigger;
