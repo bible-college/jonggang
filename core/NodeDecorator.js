@@ -1,5 +1,5 @@
 // src/core/WorkflowComponentDecorator.js
-const WorkflowComponent = require('./WorkflowComponent'); //
+const Node = require('./Node'); //
 
 /**
  * @class WorkflowComponentDecorator
@@ -7,13 +7,13 @@ const WorkflowComponent = require('./WorkflowComponent'); //
  * 모든 구체적인 데코레이터가 상속받아야 할 기본 구조를 정의합니다.
  * 내부적으로 래핑할 WorkflowComponent를 가집니다.
  */
-class WorkflowComponentDecorator extends WorkflowComponent {
+class NodeDecorator extends Node {
     constructor(component) {
         super();
-        if (new.target === WorkflowComponentDecorator) {
+        if (new.target === NodeDecorator) {
             throw new TypeError("Abstract class 'WorkflowComponentDecorator' cannot be instantiated directly.");
         }
-        if (!(component instanceof WorkflowComponent)) { //
+        if (!(component instanceof Node)) { //
             throw new Error("데코레이터는 WorkflowComponent 인스턴스를 감싸야 합니다.");
         }
         this.wrappedComponent = component;
@@ -41,4 +41,4 @@ class WorkflowComponentDecorator extends WorkflowComponent {
     }
 }
 
-module.exports = WorkflowComponentDecorator;
+module.exports = NodeDecorator;

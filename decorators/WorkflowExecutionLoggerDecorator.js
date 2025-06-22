@@ -1,5 +1,5 @@
 // src/decorators/WorkflowExecutionLoggerDecorator.js
-const WorkflowComponentDecorator = require('../core/WorkflowComponentDecorator'); // 추상 데코레이터 임포트
+const NodeDecorator = require('../core/NodeDecorator'); // 추상 데코레이터 임포트
 const EventStore = require('../core/EventStore'); // EventStore 임포트
 
 /**
@@ -8,7 +8,7 @@ const EventStore = require('../core/EventStore'); // EventStore 임포트
  * 데코레이터 패턴의 Concrete Decorator 역할을 합니다.
  * 이제 실행 성공/실패 여부와 함께 현재 시간을 로깅하며, 이벤트 속성을 간소화합니다.
  */
-class WorkflowExecutionLoggerDecorator extends WorkflowComponentDecorator {
+class WorkflowExecutionLoggerDecorator extends NodeDecorator {
     constructor(component, eventStore) { // eventStore 인자 추가
         super(component);
         this.componentName = this.wrappedComponent.constructor.name;
@@ -26,41 +26,34 @@ class WorkflowExecutionLoggerDecorator extends WorkflowComponentDecorator {
      * @returns {Object} 업데이트된 컨텍스트
      */
     execute(context = {}) {
-        const nowIso = new Date().toISOString(); // 이벤트 소싱을 위한 ISO 형식 시간
-        const logTime = new Date().toLocaleTimeString(); // 콘솔 로그용 시간
+        const nowIso = new Date().toISOString(); // 한 번만 생성
 
-        // 1. 노드 실행 시작 이벤트 기록 (간소화된 속성)
         const startedEvent = {
             type: 'NODE_EXECUTION_STARTED',
-            timestamp: nowIso,
+            timestamp: nowIso, // nowIso 사용
             nodeName: this.componentName
         };
         this.eventStore.append(startedEvent);
 
         let resultContext;
         try {
-            resultContext = super.execute(context); // 래핑된 컴포넌트의 실제 execute 호출
-
-            // 2. 노드 실행 완료 이벤트 기록 (간소화된 속성)
+            resultContext = super.execute(context);
             const completedEvent = {
                 type: 'NODE_EXECUTION_COMPLETED',
-                timestamp: new Date().toISOString(),
+                timestamp: nowIso, // nowIso 사용
                 nodeName: this.componentName
             };
             this.eventStore.append(completedEvent);
-            
         } catch (error) {
-            // 3. 노드 실행 실패 이벤트 기록 (간소화된 속성)
             const failedEvent = {
                 type: 'NODE_EXECUTION_FAILED',
-                timestamp: new Date().toISOString(),
+                timestamp: nowIso, // nowIso 사용
                 nodeName: this.componentName,
-                errorMessage: error.message // 실패 시에는 에러 메시지만 포함
+                errorMessage: error.message
             };
             this.eventStore.append(failedEvent);
-            throw error; 
+            throw error;
         }
-
         return resultContext;
     }
 }

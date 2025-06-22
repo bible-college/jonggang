@@ -36,7 +36,7 @@ const eventStore = mementoComposer.getEventStore();
 
 let dynamicWorkflow;
 let currentTriggerNode = null;
-const MEMENTO_TRIGGER_ID_GMAIL = 'gmail_account_123';
+// const MEMENTO_TRIGGER_ID_GMAIL = 'gmail_account_123';
 const MEMENTO_TRIGGER_ID_YOUTUBE = 'youtube_video_abc';
 const SLACK_READ_CHANNEL_ID = 'general';
 

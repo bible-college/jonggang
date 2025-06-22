@@ -1,5 +1,5 @@
 // src/nodes/actions/notion/NotionPageCreateNode.js (수정)
-const WorkflowComponent = require('../../../core/WorkflowComponent');
+const Node = require('../../../core/Node');
 const ICommand = require('../../../core/ICommand');
 
 // Notion 페이지 생성 로직의 실제 수신자 (Receiver) 역할
@@ -32,7 +32,7 @@ class NotionPageCreateCommand extends ICommand {
  * Notion 페이지 생성 노드.
  * 컴포지트 패턴의 리프 노드 역할과, 내부적으로 커맨드 패턴을 활용합니다.
  */
-class NotionPageCreateNode extends WorkflowComponent {
+class NotionPageCreateNode extends Node {
     // id, name, description은 더 이상 생성자에서 받지 않음
     constructor(pageTitle, content = '') {
         super();

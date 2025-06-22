@@ -1,5 +1,5 @@
 // src/nodes/actions/slack/SlackMessageNode.js (수정)
-const WorkflowComponent = require('../../../core/WorkflowComponent');
+const Node = require('../../../core/Node');
 const ICommand = require('../../../core/ICommand');
 
 class SlackMessageReceiver {
@@ -25,7 +25,7 @@ class SlackMessageCommand extends ICommand {
     }
 }
 
-class SlackMessageNode extends WorkflowComponent {
+class SlackMessageNode extends Node {
     constructor(channel, message) {
         super(); // WorkflowComponent 생성자 호출
         this.channel = channel;
