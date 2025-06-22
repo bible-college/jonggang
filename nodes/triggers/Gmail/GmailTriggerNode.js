@@ -12,7 +12,7 @@ class GmailTriggerNode extends AbstractTriggerNode {
     }
 
     update(payload) {
-        console.log(`[GmailTriggerNode] 전략으로부터 'update' 알림 수신 (계정: ${this.accountId}), 워크플로우로 전달.`);
+        console.log(`'update' 알림 수신 (계정: ${this.accountId}), 워크플로우로 전달.`);
         this.triggerCallback(payload);
     }
     execute(context) {

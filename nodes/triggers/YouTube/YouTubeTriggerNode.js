@@ -10,7 +10,7 @@ class YouTubeTriggerNode extends AbstractTriggerNode {
     }
 
     update(payload) { // Observer 인터페이스의 update 메서드 구현
-        console.log(`[YouTubeLikeTriggerNode] 전략으로부터 'update' 알림 수신 (노드 연결 비디오 ID: ${this.videoId}), 워크플로우로 전달.`);
+        console.log(`'update' 알림 수신 (노드 연결 비디오 ID: ${this.videoId}), 워크플로우로 전달.`);
         this.triggerCallback(payload);
     }
 
