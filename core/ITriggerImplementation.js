@@ -1,9 +1,6 @@
 
 class ITriggerImplementation {
     constructor() {
-        if (new.target === ITriggerImplementation) {
-            throw new TypeError("Interface 'ITriggerImplementation' cannot be instantiated directly.");
-        }
     }
 
     startListening(callback) {

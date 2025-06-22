@@ -18,7 +18,6 @@ class EventStore {
 
     clear() {
         this.events = [];
-        console.log("[EventStore] 이벤트 저장소가 초기화되었습니다.");
     }
 }
 

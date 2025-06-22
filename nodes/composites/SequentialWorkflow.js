@@ -13,23 +13,19 @@ class SequentialWorkflow extends Node {
     }
     remove(component) {
         this.nodes = this.nodes.filter(node => node !== component);
-        console.log(`[SequentialWorkflow] 노드 제거 성공: ${component.constructor.name}`);
         return true;
 
     }
 
     execute(initialContext = {}) {
-        console.log(`\n--- [SequentialWorkflow] 순차 워크플로우 실행 시작 ---`);
         let currentContext = initialContext;
         for (const node of this.nodes) {
             currentContext = node.execute(currentContext);
         }
-        console.log(`--- [SequentialWorkflow] 순차 워크플로우 실행 완료 ---\n`);
         return currentContext;
     }
 
     createMemento() {
-        console.log("[SequentialWorkflow] 현재 워크플로우 상태를 Memento로 저장.");
         return new WorkflowMemento(this.nodes.slice());
     }
 

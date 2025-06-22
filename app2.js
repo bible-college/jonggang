@@ -20,14 +20,10 @@ const simulateEvent = (triggerNode, service, id, message) => {
         id: id,
         message: message
     };
-    if (triggerNode && triggerNode.wrappedComponent && triggerNode.wrappedComponent.strategy) {
-        triggerNode.wrappedComponent.strategy.notify(payload);
-    } else {
-        console.error("[app.js] 시뮬레이션 오류: 트리거 노드의 전략을 찾을 수 없습니다. 데코레이터 또는 노드 구조를 확인하세요.");
-    }
+    triggerNode.wrappedComponent.strategy.notify(payload);
+
 };
 
-console.log("\n--- 메멘토 패턴 시연 (간소화 - 연속 빌드) ---");
 
 const mementoRunner = new WorkflowRunnerFacade();
 const caretaker = new WorkflowCaretaker();
@@ -43,13 +39,11 @@ const SLACK_READ_CHANNEL_ID = 'general';
 // 1단계: 초기 빈 워크플로우 시작 및 상태 저장
 dynamicWorkflow = mementoComposer.startNewWorkflow().build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
-console.log("[메멘토] 초기 빈 워크플로우 상태 저장.");
 
 // 2단계: YouTubeLikeTriggerNode 추가 (로컬 폴링 구현 사용) 및 상태 저장
 currentTriggerNode = mementoComposer.addYouTubeLikeTriggerNode(MEMENTO_TRIGGER_ID_YOUTUBE, 'local'); // 이제 add 메서드가 노드를 직접 반환
 dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
-console.log("[메멘토] YouTube 트리거 노드 (로컬 폴링) 추가 및 상태 저장.");
 
 // --- 추가 시작 ---
 // 2.5단계: YouTubeReadRecentLikedVideoNode 추가 및 상태 저장
@@ -57,7 +51,6 @@ console.log("[메멘토] YouTube 트리거 노드 (로컬 폴링) 추가 및 상
 let youtubeReadRecentLikedVideoNode = mementoComposer.addYouTubeReadRecentLikedVideoNode();
 dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
-console.log("[메멘토] YouTube 최신 좋아요 받은 영상 읽기 노드 추가 및 상태 저장.");
 // --- 추가 끝 ---
 
 
@@ -66,45 +59,29 @@ console.log("[메멘토] YouTube 최신 좋아요 받은 영상 읽기 노드 �
 let slackReadChannelNode = mementoComposer.addSlackReadChannelNode(SLACK_READ_CHANNEL_ID); // 노드 참조 저장
 dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
-console.log("[메멘토] Slack 채널 읽기 노드 추가 및 상태 저장.");
 
 // 4단계: Slack 메시지 노드 추가 및 상태 저장
-let slackMessageNode = mementoComposer.addSlackMessageNode('#dynamic-channel', '동적 워크플로우 Slack 메시지'); // 노드 참조 저장
+let slackMessageNode = mementoComposer.addSlackMessageNode('그룹단톡방', '메시지'); // 노드 참조 저장
 dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
-console.log("[메멘토] Slack 메시지 노드 추가 및 상태 저장.");
 
-// 5단계: Notion 페이지 생성 노드 추가 및 상태 저장
-let notionPageNode = mementoComposer.addNotionPageCreateNode('동적 Notion 페이지', '동적 워크플로우 Notion 내용'); // 노드 참조 저장
+let slackMessageNode2 = mementoComposer.addSlackMessageNode('개인채널', '메시지'); // 노드 참조 저장
 dynamicWorkflow = mementoComposer.build();
-caretaker.saveMemento(dynamicWorkflow.createMemento()); // 노션 추가 후 상태 저장
-console.log("[메멘토] Notion 노드 추가 및 상태 저장.");
-
-console.log("-> 현재 워크플로우 노드 구성:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(' -> '));
-
+caretaker.saveMemento(dynamicWorkflow.createMemento());
 // 최종 워크플로우 실행 시뮬레이션 (노션 포함된 상태)
-console.log("\n--- 최종 워크플로우 실행 시뮬레이션 (노션 포함) ---");
 const workflowIdForRun = dynamicWorkflow.id || 'simulated-workflow-1';
 mementoRunner.runWorkflow(dynamicWorkflow, { workflowId: workflowIdForRun });
-simulateEvent(currentTriggerNode, 'youtube', MEMENTO_TRIGGER_ID_YOUTUBE, '최종 워크플로우 실행 - YouTube 이벤트');
+simulateEvent(currentTriggerNode, 'youtube', MEMENTO_TRIGGER_ID_YOUTUBE, '최종 워크플로우 실행');
 
 
-// --- 특정 노드 삭제 시연 (노션 노드 삭제) ---
-console.log("\n--- 특정 노드 삭제 시연 (노션 노드 삭제) ---");
-console.log("-> 삭제 전 워크플로우 노드:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(' -> '));
-
-// Notion 노드를 직접 삭제합니다.
-mementoComposer.removeNode(notionPageNode); // 저장해 둔 Notion 노드 참조를 사용하여 삭제
-dynamicWorkflow = mementoComposer.build(); // 변경된 워크플로우 인스턴스 반영 (Optional but good practice)
+console.log("\n개인채널 삭제")
+mementoComposer.removeNode(slackMessageNode2); 
+dynamicWorkflow = mementoComposer.build(); 
 caretaker.saveMemento(dynamicWorkflow.createMemento()); // 삭제 후 상태 저장
-console.log("[메멘토] Notion 노드 제거 후 상태 저장.");
-console.log("-> 삭제 후 워크플로우 노드:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(' -> '));
 
-// 삭제 후 워크플로우 실행 시뮬레이션 (노션 삭제된 상태)
-console.log("\n--- 삭제 후 워크플로우 실행 시뮬레이션 (노션 제거됨) ---");
 const workflowIdAfterDelete = dynamicWorkflow.id || 'simulated-workflow-2';
 mementoRunner.runWorkflow(dynamicWorkflow, { workflowId: workflowIdAfterDelete });
-simulateEvent(currentTriggerNode, 'youtube', MEMENTO_TRIGGER_ID_YOUTUBE, '삭제 후 워크플로우 실행 - YouTube 이벤트');
+simulateEvent(currentTriggerNode, 'youtube', MEMENTO_TRIGGER_ID_YOUTUBE, '삭제 후 워크플로우 실행');
 
 
 // --- 롤백 시연 (노션 노드가 다시 나타나도록 롤백) ---
@@ -114,14 +91,10 @@ console.log("\n--- 롤백 시연 시작 ---");
 caretaker.getMemento(); // '노션 삭제 후' 상태를 스택에서 제거 (이전 단계에서 저장한 것)
 const notionAddedMemento = caretaker.getMemento(); // '노션 추가 후' 상태를 가져옴
 dynamicWorkflow.restoreFromMemento(notionAddedMemento);
-console.log("[메멘토] 롤백 완료: Notion 노드 추가 이전 상태로 복원.");
-console.log("-> 롤백 후 워크플로우 노드:", dynamicWorkflow.nodes.map(n => n.constructor.name).join(' -> '));
-
 // 롤백된 상태의 워크플로우 실행 시뮬레이션 (노션 복원됨)
-console.log("\n--- 롤백 후 워크플로우 실행 시뮬레이션 (노션 복원됨) ---");
 const workflowIdForRollback = dynamicWorkflow.id || 'simulated-workflow-3';
 mementoRunner.runWorkflow(dynamicWorkflow, { workflowId: workflowIdForRollback });
-simulateEvent(currentTriggerNode, 'youtube', MEMENTO_TRIGGER_ID_YOUTUBE, '롤백 후 워크플로우 실행 - YouTube 이벤트');
+simulateEvent(currentTriggerNode, 'youtube', MEMENTO_TRIGGER_ID_YOUTUBE, '롤백 후 워크플로우 실행');
 
 
 // 최종 이벤트 저장소 내용 확인
@@ -130,4 +103,4 @@ eventStore.getAllEvents().forEach(event => {
     console.log(`[Event: ${event.type}] Node: ${event.nodeName}, Time: ${new Date(event.timestamp).toLocaleTimeString()}, `);
 });
 
-console.log("\n--- 메멘토 패턴 시연 완료 ---");
+console.log("\n--- 시연 완료 ---");

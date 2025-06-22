@@ -15,7 +15,6 @@ class AbstractTriggerNode extends Node {
 
     onTrigger(listener) {
         this.triggerCallback = listener;
-        console.log(`[AbstractTriggerNode] 외부 트리거 리스너 등록됨. (트리거 노드의 triggerCallback에 연결)`);
     }
 
     execute() {

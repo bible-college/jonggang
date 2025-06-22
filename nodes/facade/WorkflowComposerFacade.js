@@ -2,7 +2,6 @@
 
 const SequentialWorkflow = require('../composites/SequentialWorkflow');
 const DefaultSlackNodeFactory = require('../actions/slack/DefaultSlackNodeFactory');
-const DefaultNotionNodeFactory = require('../actions/notion/DefaultNotionNodeFactory');
 const DefaultYoutubeNodeFactory = require('../actions/Youtube_action/DefaultYoutubeNodeFactory')
 const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
 const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
@@ -15,7 +14,6 @@ const EventStore = require('../../core/EventStore');
 class WorkflowComposerFacade {
     constructor() {
         this.slackFactory = new DefaultSlackNodeFactory();
-        this.notionFactory = new DefaultNotionNodeFactory();
         this.youtubeFactory = new DefaultYoutubeNodeFactory();
         this.currentWorkflow = null;
         this.eventStore = new EventStore();
@@ -45,16 +43,6 @@ class WorkflowComposerFacade {
         return slackReadNode; 
     }
 
-    addNotionPageCreateNode(pageTitle, content = '') {
-        let notionPageNode = this.notionFactory.createPageCreateBuilder()
-            .setTitle(pageTitle)
-            .setContent(content)
-            .build();
-        notionPageNode = new WorkflowExecutionLoggerDecorator(notionPageNode, this.eventStore);
-        this.currentWorkflow.add(notionPageNode);
-        return notionPageNode; 
-    }
-
     addYouTubeReadRecentLikedVideoNode() {
         let youtubeReadRecentLikedVideoNode = this.youtubeFactory.createYouTubeReadRecentLikedVideoBuilder().build(); // <-- 수정됨!
         youtubeReadRecentLikedVideoNode = new WorkflowExecutionLoggerDecorator(youtubeReadRecentLikedVideoNode, this.eventStore);
@@ -81,10 +69,6 @@ class WorkflowComposerFacade {
     }
 
     removeNode(nodeToRemove) {
-        if (!this.currentWorkflow) {
-            console.warn("[WorkflowComposerFacade] 현재 구성 중인 워크플로우가 없습니다. 노드를 제거할 수 없습니다.");
-            return this;
-        }
         this.currentWorkflow.remove(nodeToRemove);
         return this; 
     }

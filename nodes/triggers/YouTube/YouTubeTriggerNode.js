@@ -15,11 +15,9 @@ class YouTubeTriggerNode extends AbstractTriggerNode {
     }
 
     execute(context) { // WorkflowComponent의 execute 메서드 구현
-        console.log(`[YouTubeLikeTriggerNode] 노드 실행 지시 (노드 연결 비디오 ID: ${this.videoId}). (트리거 노드는 감시 준비만 함)`);
         this.strategy.startMonitoring();
     }
     stop() {
-        console.log(`[YouTubeLikeTriggerNode] 노드 중지 지시 (노드 연결 비디오 ID: ${this.videoId}). 전략에 감지 중지 위임.`);
         this.strategy.stopMonitoring();
     }
 }

@@ -6,7 +6,7 @@ class NodeDecorator extends Node {
         this.wrappedComponent = component;
     }
     execute(context = {}) {
-        return this.wrappedComponent.execute(context); //
+        return this.wrappedComponent.execute(context); 
     }
     add(component) {
         return this.wrappedComponent.add(component);
