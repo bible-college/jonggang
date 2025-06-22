@@ -51,6 +51,16 @@ dynamicWorkflow = mementoComposer.build();
 caretaker.saveMemento(dynamicWorkflow.createMemento());
 console.log("[메멘토] YouTube 트리거 노드 (로컬 폴링) 추가 및 상태 저장.");
 
+// --- 추가 시작 ---
+// 2.5단계: YouTubeReadRecentLikedVideoNode 추가 및 상태 저장
+// 이 노드는 트리거에서 받은 컨텍스트 정보(좋아요 비디오 ID)를 사용합니다.
+let youtubeReadRecentLikedVideoNode = mementoComposer.addYouTubeReadRecentLikedVideoNode();
+dynamicWorkflow = mementoComposer.build();
+caretaker.saveMemento(dynamicWorkflow.createMemento());
+console.log("[메멘토] YouTube 최신 좋아요 받은 영상 읽기 노드 추가 및 상태 저장.");
+// --- 추가 끝 ---
+
+
 
 // 3단계: Slack 채널 읽기 노드 추가 및 상태 저장
 let slackReadChannelNode = mementoComposer.addSlackReadChannelNode(SLACK_READ_CHANNEL_ID); // 노드 참조 저장
