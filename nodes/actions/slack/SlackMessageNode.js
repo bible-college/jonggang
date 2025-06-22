@@ -1,9 +1,10 @@
-const Node = require('../../../core/Node');
-const ICommand = require('../../../core/ICommand');
+// src/nodes/actions/slack/SlackMessageNode.js
+const Node = require('../../../core/Node'); //
+const ICommand = require('../../../core/ICommand'); //
 
 class SlackMessageReceiver {
     sendMessage(channel, message) {
-        console.log(`Slack 메시지 전송: 채널 '${channel}', 메시지 '${message}'`);
+        console.log(`Slack 메시지 전송: 채널 '${channel}','${message}'`);
     }
 }
 class SlackMessageCommand extends ICommand {
@@ -29,12 +30,19 @@ class SlackMessageNode extends Node {
         this.command = new SlackMessageCommand(this.receiver, channel, message);
     }
     execute(context = {}) { 
-        const messageFromReadChannel = context.slackReadMessageContent;
-        const finalMessage = `${this.message}. 이전 Slack 채널 읽기 결과: "${messageFromReadChannel}"'}`;
-        const dynamicCommand = new SlackMessageCommand(this.receiver, this.channel, finalMessage);
+        let lastKnownValue = null; 
+        for (const key in context) {
+            lastKnownValue = context[key];
+        }
+        
+        let combinedMessage = this.message;
+        combinedMessage += ` ${String(lastKnownValue)}`; 
+
+        
+        const dynamicCommand = new SlackMessageCommand(this.receiver, this.channel, combinedMessage);
         dynamicCommand.execute();
         
-        return { ...context, slackMessageSent: true, finalSlackMessage: finalMessage }; 
+        return { ...context, slackMessageSent: true, finalSlackMessage: combinedMessage }; 
     }
 }
 

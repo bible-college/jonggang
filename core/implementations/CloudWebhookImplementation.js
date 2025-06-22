@@ -1,6 +1,6 @@
 
-const ITriggerImplementation = require('../ITriggerImplementation'); //
-const Registry = require('../Registry'); //
+const ITriggerImplementation = require('../ITriggerImplementation'); 
+const Registry = require('../Registry'); 
 
 class CloudWebhookImplementation extends ITriggerImplementation {
     constructor() {
@@ -9,19 +9,19 @@ class CloudWebhookImplementation extends ITriggerImplementation {
         this.config = null;
     }
 
-    startListening(callback, config) { //
-        this.triggerCallback = callback; //
-        this.config = config; //
+    startListening(callback, config) { 
+        this.triggerCallback = callback; 
+        this.config = config; 
 
     }
 
-    stopListening() { //
-        this.triggerCallback = null; //
-        this.config = null; //
+    stopListening() { 
+        this.triggerCallback = null; 
+        this.config = null; 
     }
 }
 
 // 이 모듈이 로드될 때 자체적으로 레지스트리에 등록
-Registry.registerImplementation('cloud', () => new CloudWebhookImplementation()); //
+Registry.registerImplementation('cloud', () => new CloudWebhookImplementation()); 
 
-module.exports = CloudWebhookImplementation; //
+module.exports = CloudWebhookImplementation; 

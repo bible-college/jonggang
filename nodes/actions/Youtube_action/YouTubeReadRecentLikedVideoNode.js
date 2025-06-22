@@ -4,7 +4,7 @@ const ICommand = require('../../../core/ICommand');
 
 class YouTubeReadRecentLikedVideoReceiver {
     readRecentLikedVideos() {
-    return `최근 좋아요 받은 영상: 'ai의 트랜드에 관하여''`;
+    return `최근 좋아요 받은 영상: ai의 트랜드에 관하여`;
     }
 }
 
