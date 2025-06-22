@@ -1,7 +1,8 @@
-// src/nodes/factories/DefaultSlackNodeFactory.js
+
 const AbstractNodeFactory = require('../../../core/AbstractNodeFactory'); // AbstractNodeFactory를 require
 const SlackMessageBuilder = require('./SlackMessageBuilder');
 const SlackReadChannelBuilder = require('./SlackReadChannelBuilder');
+const YouTubeReadRecentLikedVideoBuilder = require('../YoutubeLike/YouTubeReadRecentLikedVideoBuilder');
 
 /**
  * @class DefaultSlackNodeFactory
@@ -18,6 +19,9 @@ class DefaultSlackNodeFactory extends AbstractNodeFactory {
 
     createReadChannelBuilder() {
         return new SlackReadChannelBuilder();
+    }
+    createReadRecentLikedVideoBuilder() {
+        return new YouTubeReadRecentLikedVideoBuilder();
     }
 }
 

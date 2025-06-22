@@ -11,6 +11,7 @@ const Registry = require('../../core/Registry');
 const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator');
 const EventStore = require('../../core/EventStore');
 
+
 /**
  * @class WorkflowComposerFacade
  * 복잡한 워크플로우 구성 과정을 단순화하는 퍼사드 클래스.
@@ -76,6 +77,21 @@ class WorkflowComposerFacade {
         this.currentWorkflow.add(notionPageNode);
         return notionPageNode; // 추가된 노드를 직접 반환
     }
+
+    // --- 추가 시작: YouTubeReadRecentLikedVideoNode를 추가하는 메서드 ---
+    /**
+     * YouTube 트리거에서 받은 '최신 좋아요' 정보를 기반으로
+     * 해당 영상의 상세 정보를 읽어오는 노드를 추가합니다.
+     * @returns {WorkflowComponent} 추가된 YouTubeReadRecentLikedVideoNode 인스턴스
+     */
+    // YouTubeReadRecentLikedVideoNode를 추가하는 메서드 (이제 this.slackFactory 사용)
+    addYouTubeReadRecentLikedVideoNode() {
+        let youtubeReadRecentLikedVideoNode = this.slackFactory.createReadRecentLikedVideoBuilder().build(); // <-- 수정됨!
+        youtubeReadRecentLikedVideoNode = new WorkflowExecutionLoggerDecorator(youtubeReadRecentLikedVideoNode, this.eventStore);
+        this.currentWorkflow.add(youtubeReadRecentLikedVideoNode);
+        return youtubeReadRecentLikedVideoNode;
+    }
+    // --- 추가 끝 ---
 
     /**
      * YouTube 좋아요 트리거 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
