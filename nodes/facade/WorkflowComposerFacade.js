@@ -7,12 +7,9 @@ const GmailTriggerStrategy = require('../triggers/Gmail/GmailTriggerStrategy');
 const GmailTriggerNode = require('../triggers/Gmail/GmailTriggerNode');
 const YouTubeLikeTriggerNode = require('../triggers/YouTube/YouTubeLikeTriggerNode');
 const YouTubeLikeTriggerStrategy = require('../triggers/YouTube/YouTubeLikeTriggerStrategy');
-
-// Registry 임포트
 const Registry = require('../../core/Registry');
-
-const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator'); 
-const EventStore = require('../../core/EventStore'); // EventStore 임포트
+const WorkflowExecutionLoggerDecorator = require('../../decorators/WorkflowExecutionLoggerDecorator');
+const EventStore = require('../../core/EventStore');
 
 /**
  * @class WorkflowComposerFacade
@@ -23,75 +20,115 @@ const EventStore = require('../../core/EventStore'); // EventStore 임포트
  */
 class WorkflowComposerFacade {
     constructor() {
-        this.slackFactory = new DefaultSlackNodeFactory(); //
-        this.notionFactory = new DefaultNotionNodeFactory(); //
+        this.slackFactory = new DefaultSlackNodeFactory();
+        this.notionFactory = new DefaultNotionNodeFactory();
         this.currentWorkflow = null;
-        this.eventStore = new EventStore(); // EventStore 인스턴스 생성
+        this.eventStore = new EventStore();
     }
 
     startNewWorkflow() {
-        this.currentWorkflow = new SequentialWorkflow(); //
+        this.currentWorkflow = new SequentialWorkflow();
         return this;
     }
 
+    /**
+     * Slack 메시지 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
+     * @param {string} channel - Slack 채널
+     * @param {string} message - 전송할 메시지
+     * @returns {WorkflowComponent} 추가된 SlackMessageNode 인스턴스
+     */
     addSlackMessageNode(channel, message) {
         let slackMessageNode = this.slackFactory.createMessageBuilder()
             .setChannel(channel)
             .setMessage(message)
             .build();
-        // 생성된 노드를 데코레이터로 감쌉니다.
-        slackMessageNode = new WorkflowExecutionLoggerDecorator(slackMessageNode, this.eventStore); // eventStore 전달
+        slackMessageNode = new WorkflowExecutionLoggerDecorator(slackMessageNode, this.eventStore);
         this.currentWorkflow.add(slackMessageNode);
-        return this;
+        return slackMessageNode; // 추가된 노드를 직접 반환
     }
 
+    /**
+     * Slack 채널 읽기 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
+     * @param {string} channelId - 읽을 Slack 채널 ID
+     * @returns {WorkflowComponent} 추가된 SlackReadChannelNode 인스턴스
+     */
     addSlackReadChannelNode(channelId) {
         let slackReadNode = this.slackFactory.createReadChannelBuilder()
             .setChannelId(channelId)
             .build();
-        // 생성된 노드를 데코레이터로 감쌉니다.
-        slackReadNode = new WorkflowExecutionLoggerDecorator(slackReadNode, this.eventStore); // eventStore 전달
+        slackReadNode = new WorkflowExecutionLoggerDecorator(slackReadNode, this.eventStore);
         this.currentWorkflow.add(slackReadNode);
-        return this;
+        return slackReadNode; // 추가된 노드를 직접 반환
     }
 
+    /**
+     * Notion 페이지 생성 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
+     * @param {string} pageTitle - Notion 페이지 제목
+     * @param {string} content - Notion 페이지 내용
+     * @returns {WorkflowComponent} 추가된 NotionPageCreateNode 인스턴스
+     */
     addNotionPageCreateNode(pageTitle, content = '') {
         let notionPageNode = this.notionFactory.createPageCreateBuilder()
             .setTitle(pageTitle)
             .setContent(content)
             .build();
-        // 생성된 노드를 데코레이터로 감쌉니다.
-        notionPageNode = new WorkflowExecutionLoggerDecorator(notionPageNode, this.eventStore); // eventStore 전달
+        notionPageNode = new WorkflowExecutionLoggerDecorator(notionPageNode, this.eventStore);
         this.currentWorkflow.add(notionPageNode);
-        return this;
+        return notionPageNode; // 추가된 노드를 직접 반환
     }
 
-    addYouTubeLikeTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
-        const implementation = Registry.createImplementation(implementationType); //
-        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, notificationType, threshold); //
-        let youtubeTrigger = new YouTubeLikeTriggerNode(videoId, youtubeLikeStrategy); //
-        // 생성된 노드를 데코레이터로 감쌉니다.
-        youtubeTrigger = new WorkflowExecutionLoggerDecorator(youtubeTrigger, this.eventStore); // eventStore 전달
-        this.currentWorkflow.add(youtubeTrigger);
-        return this;
-    }
-    
-    addGmailTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
-        // currentWorkflow가 항상 유효하다고 가정
-        const implementation = Registry.createImplementation(implementationType);
-        const GmailStrategy = new GmailTriggerStrategy(implementation, notificationType, threshold);
-        let GmailTrigger = new GmailTriggerNode(videoId, GmailStrategy);
-        GmailTrigger = new WorkflowExecutionLoggerDecorator(GmailTrigger, this.eventStore); // eventStore 전달
-        this.currentWorkflow.add(GmailTrigger);
-        return this;
-    }
     /**
-     * 현재 구성 중인 워크플로우를 완성하고 반환합니다.
-     * 이 메서드는 퍼사드의 내부 currentWorkflow를 null로 초기화하지 않습니다.
-     * @returns {SequentialWorkflow} 구성된 워크플로우 객체
+     * YouTube 좋아요 트리거 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
+     * @param {string} videoId - 감지할 YouTube 비디오 ID
+     * @param {string} implementationType - 사용할 구현체 타입 ('localYouTube', 'cloud' 등)
+     * @param {string} notificationType - 알림 방식 ('immediate', 'batch', 'threshold')
+     * @param {number} threshold - 임계치 (threshold 방식 사용 시)
+     * @returns {WorkflowComponent} 추가된 YouTubeLikeTriggerNode 인스턴스
      */
+    addYouTubeLikeTriggerNode(videoId, implementationType, notificationType = 'immediate', threshold = 0) {
+        const implementation = Registry.createImplementation(implementationType);
+        const youtubeLikeStrategy = new YouTubeLikeTriggerStrategy(implementation, videoId, notificationType, threshold);
+        let youtubeTrigger = new YouTubeLikeTriggerNode(videoId, youtubeLikeStrategy);
+        youtubeTrigger = new WorkflowExecutionLoggerDecorator(youtubeTrigger, this.eventStore);
+        this.currentWorkflow.add(youtubeTrigger);
+        return youtubeTrigger; // 추가된 노드를 직접 반환
+    }
+
+    /**
+     * Gmail 트리거 노드를 추가하고 추가된 노드 인스턴스를 반환합니다.
+     * @param {string} accountId - 감지할 Gmail 계정 ID
+     * @param {string} implementationType - 사용할 구현체 타입 ('localGmail', 'cloud' 등)
+     * @param {string} notificationType - 알림 방식 ('immediate', 'batch', 'threshold')
+     * @param {number} threshold - 임계치 (threshold 방식 사용 시)
+     * @returns {WorkflowComponent} 추가된 GmailTriggerNode 인스턴스
+     */
+    addGmailTriggerNode(accountId, implementationType, notificationType = 'immediate', threshold = 0) {
+        const implementation = Registry.createImplementation(implementationType);
+        const gmailStrategy = new GmailTriggerStrategy(implementation, accountId, notificationType, threshold);
+        let gmailTrigger = new GmailTriggerNode(accountId, gmailStrategy);
+        gmailTrigger = new WorkflowExecutionLoggerDecorator(gmailTrigger, this.eventStore);
+        this.currentWorkflow.add(gmailTrigger);
+        return gmailTrigger; // 추가된 노드를 직접 반환
+    }
+
+    /**
+     * 현재 워크플로우에서 특정 노드를 제거합니다.
+     * 이 메서드는 제거할 노드의 객체 참조를 알아야 합니다.
+     * @param {WorkflowComponent} nodeToRemove - 제거할 노드의 객체 참조
+     * @returns {WorkflowComposerFacade} 현재 퍼사드 인스턴스 (메서드 체이닝을 위해)
+     */
+    removeNode(nodeToRemove) {
+        if (!this.currentWorkflow) {
+            console.warn("[WorkflowComposerFacade] 현재 구성 중인 워크플로우가 없습니다. 노드를 제거할 수 없습니다.");
+            return this;
+        }
+        this.currentWorkflow.remove(nodeToRemove);
+        return this; // 메서드 체이닝을 위해 퍼사드 인스턴스 반환
+    }
+
     build() {
         const builtWorkflow = this.currentWorkflow;
+        // build 후에도 currentWorkflow 참조를 유지하므로 null로 초기화하지 않습니다.
         return builtWorkflow;
     }
 
@@ -99,7 +136,6 @@ class WorkflowComposerFacade {
         return this.currentWorkflow;
     }
 
-    // EventStore 인스턴스에 접근할 수 있는 getter 추가
     getEventStore() {
         return this.eventStore;
     }
