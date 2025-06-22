@@ -2,7 +2,7 @@ const AbstractTriggerNode = require('../AbstractTriggerNode');
 const GmailTriggerStrategy = require('./GmailTriggerStrategy');
 
 class GmailTriggerNode extends AbstractTriggerNode {
-    constructor(accountId, strategy) { // accountId가 노드 식별자 역할
+    constructor(accountId, strategy) { 
         super();
         this.accountId = accountId;
 
